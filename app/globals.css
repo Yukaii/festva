@@ -1,0 +1,260 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+/* Festival Timetable Grid Styles */
+.festival-timetable {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "time-header stage-headers"
+    "time-labels grid-content";
+  overflow: auto;
+  max-height: 80vh;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+/* Time header cell (top-left corner) */
+.time-header-cell {
+  grid-area: time-header;
+  background-color: hsl(var(--background));
+  border-right: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+  z-index: 30;
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
+/* Stage headers (top row) */
+.stage-headers {
+  grid-area: stage-headers;
+  display: grid;
+  grid-auto-columns: minmax(120px, 1fr);
+  grid-auto-flow: column;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: hsl(var(--background));
+}
+
+.stage-header {
+  padding: 8px;
+  font-weight: bold;
+  text-align: center;
+  border-left: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Time labels (left column) */
+.time-labels {
+  grid-area: time-labels;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background-color: hsl(var(--background));
+  border-right: 1px solid hsl(var(--border));
+}
+
+.time-label {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.time-label.hour-mark {
+  font-weight: bold;
+  border-bottom: 2px solid hsl(var(--foreground) / 0.7);
+}
+
+.time-label.half-hour-mark {
+  border-bottom: 1px solid hsl(var(--foreground) / 0.5);
+}
+
+.time-label.ten-min-mark {
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Grid content (main area) */
+.grid-content {
+  grid-area: grid-content;
+  display: grid;
+  grid-auto-columns: minmax(120px, 1fr);
+  grid-auto-flow: column;
+  position: relative;
+}
+
+.stage-column {
+  position: relative;
+  border-left: 1px solid hsl(var(--border));
+  min-height: 100%;
+}
+
+.time-cell {
+  height: 30px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.time-cell.hour-mark {
+  border-bottom: 2px solid hsl(var(--foreground) / 0.7);
+}
+
+.time-cell.half-hour-mark {
+  border-bottom: 1px solid hsl(var(--foreground) / 0.5);
+}
+
+/* Performance cards */
+.performance-card {
+  position: absolute;
+  width: calc(100% - 8px);
+  margin-left: 4px;
+  margin-right: 4px;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid hsl(var(--border));
+  overflow: hidden;
+}
+
+.performance-title {
+  font-weight: 500;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.performance-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.artist-name {
+  opacity: 0.75;
+  color: hsl(var(--foreground));
+}
+
+.favorite-button {
+  opacity: 0.75;
+}
+
+.favorite-button:hover {
+  opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .time-label {
+    height: 20px;
+    font-size: 0.75rem;
+  }
+
+  .time-cell {
+    height: 20px;
+  }
+
+  .performance-card {
+    padding: 4px;
+  }
+}
+
+/* Scrollbar styling */
+.festival-timetable::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.festival-timetable::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+}
+
+.festival-timetable::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.5);
+  border-radius: 4px;
+}
+
+.festival-timetable::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.7);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+

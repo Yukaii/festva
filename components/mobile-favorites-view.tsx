@@ -94,64 +94,63 @@ export function MobileFavoritesView({
     return new Date(`${favoritesSelectedDate}T${a}:00`).getTime() - new Date(`${favoritesSelectedDate}T${b}:00`).getTime();
   })
 
+  // Check if there are any favorites across all dates
+  const hasAnyFavorites = performances.some(p => favorites.includes(p.id));
+
   // Check filtered performances for the selected date
-  if (filteredPerformancesForDate.length === 0) {
-    return (
-      <div className="text-center py-8 border rounded-lg dark:border-gray-800">
-        <p className="text-gray-500 dark:text-gray-400">此日期沒有收藏的表演。</p>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">點擊表演上的愛心圖標來添加收藏。</p>
-      </div>
-    )
-  }
+  // NOTE: Early return removed to always show date tabs
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <div className="space-y-4 pb-16">
-        {/* Sticky container for Tabs and Share Button */}
-        <div className="sticky top-10 z-10 bg-background py-2 space-y-2"> {/* Added sticky container */}
-          {/* Add Day 1/Day 2 Tabs - Use local state */}
-          <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="2025-03-29">Day 1 (3/29)</TabsTrigger>
-              <TabsTrigger value="2025-03-30">Day 2 (3/30)</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Date Tabs - Always visible */}
+        <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full sticky top-10 z-10 bg-background py-2">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="2025-03-29">Day 1 (3/29)</TabsTrigger>
+            <TabsTrigger value="2025-03-30">Day 2 (3/30)</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-          {/* Add share button - Check filtered performances */}
-          {filteredPerformancesForDate.length > 0 && (
+        {/* Share Button - Always visible if any favorites exist */}
+        {hasAnyFavorites && (
+          <div className="sticky top-[calc(theme(spacing.10)+50px)] z-10 bg-background py-2"> {/* Adjust top based on Tabs height */}
             <Button
               variant="outline"
-            size="sm"
-            onClick={handleGenerateImage}
-            disabled={isGenerating}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                  <title>Loading</title> {/* Added title */}
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /> {/* Self-closing */}
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /> {/* Self-closing */}
-                </svg>
-                產生中...
-              </>
-            ) : (
-              <>
-                <Share2 className="h-4 w-4 mr-2" />
-                分享我的行程
-              </>
+              size="sm"
+              onClick={handleGenerateImage}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <title>Loading</title> {/* Added title */}
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /> {/* Self-closing */}
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /> {/* Self-closing */}
+                  </svg>
+                  產生中...
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  分享我的行程
+                </>
               )}
             </Button>
-          )}
-        </div> {/* Close sticky container */}
+          </div>
+        )}
 
-        <div className="space-y-4">
-          {sortedTimes.map((time) => (
-          <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">
-            <div className="bg-gray-100 dark:bg-gray-800 p-2 font-medium border-b dark:border-gray-700">{time}</div>
-            <div className="divide-y dark:divide-gray-800">
-              {performancesByTime[time].map((performance) => {
-                const stage = stages.find((s) => s.id === performance.stageId)
+        {/* Conditional Content based on filtered performances for the selected date */}
+        {filteredPerformancesForDate.length > 0 ? (
+          <>
+            {/* Performance List */}
+            <div className="space-y-4">
+              {sortedTimes.map((time) => (
+              <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">
+                <div className="bg-gray-100 dark:bg-gray-800 p-2 font-medium border-b dark:border-gray-700">{time}</div>
+                <div className="divide-y dark:divide-gray-800">
+                  {performancesByTime[time].map((performance) => {
+                    const stage = stages.find((s) => s.id === performance.stageId)
                 const isFavorite = favorites.includes(performance.id)
                 const duration = calculateDuration(performance.startTime, performance.endTime)
 
@@ -188,8 +187,16 @@ export function MobileFavoritesView({
               })}
             </div>
           </div>
-          ))}
-        </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          // Message when no favorites for the selected date
+          <div className="text-center py-8 border rounded-lg dark:border-gray-800 mt-4">
+            <p className="text-gray-500 dark:text-gray-400">此日期沒有收藏的表演。</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">點擊表演上的愛心圖標來添加收藏。</p>
+          </div>
+        )}
       </div>
       {/* Dialog Content */}
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px]">

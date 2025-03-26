@@ -53,13 +53,29 @@ export async function generateScheduleImage({
     const maxWidth = width - 150 // Consistent padding
     let totalHeight = 150 // Header space
 
+    // Sort performances by date and start time
+    const sortedPerformances = [...performances].sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.startTime}`);
+      const dateB = new Date(`${b.date}T${b.startTime}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+
     ctx.font = "bold 24px Arial"
-    const cardInfos = performances.map(performance => 
+    const cardInfos = sortedPerformances.map(performance => 
       getCardInfo(ctx, performance.name, maxWidth)
     )
     
-    // Calculate total height including spacing
-    totalHeight += cardInfos.reduce((sum, info) => sum + info.cardHeight + 20, 0)
+    // Calculate total height including spacing and potential dividers
+    let previousDate = "";
+    totalHeight += cardInfos.reduce((sum, info, index) => {
+      let spacing = info.cardHeight + 20;
+      const currentDate = sortedPerformances[index].date;
+      if (index > 0 && currentDate !== previousDate) {
+        spacing += 30; // Add space for divider line + padding
+      }
+      previousDate = currentDate;
+      return sum + spacing;
+    }, 0);
     
     // Set canvas dimensions with extra padding
     const height = Math.max(300, totalHeight + 30)
@@ -92,13 +108,22 @@ export async function generateScheduleImage({
     }
 
     // Draw performances
-    let yPos = 150
-    performances.forEach((performance, index) => {
-      const stage = stages.find((s) => s.id === performance.stageId)
-      if (!stage) return
+    let yPos = 150;
+    let currentDrawingDate = "";
+    sortedPerformances.forEach((performance, index) => {
+      const stage = stages.find((s) => s.id === performance.stageId);
+      if (!stage) return;
+
+      // Check if date changed and draw divider
+      if (index > 0 && performance.date !== currentDrawingDate) {
+        ctx.fillStyle = theme === "dark" ? "#4b5563" : "#d1d5db"; // Divider color
+        ctx.fillRect(50, yPos, width - 100, 2); // Draw line
+        yPos += 30; // Add space after divider
+      }
+      currentDrawingDate = performance.date;
 
       // Get pre-calculated card info
-      const { lines, cardHeight } = cardInfos[index]
+      const { lines, cardHeight } = cardInfos[index];
 
       // Extract and map stage color
       const colorClass = stage.color

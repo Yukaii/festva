@@ -124,34 +124,30 @@ export function FestivalTimetable() {
           
           {/* View and action tools section */}
           <div className="flex justify-center w-full flex-wrap gap-2">
-            <button 
+            {/* Always show Timetable button */}
+            <button
               type="button"
               className={cn(
                 "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
-                mobileView === "favorites" && "bg-primary text-primary-foreground font-medium"
+                // Style to indicate when grid view is active
+                mobileView === "grid" && "bg-primary text-primary-foreground font-medium" 
               )}
-              onClick={() => setMobileView(mobileView === "grid" ? "favorites" : "grid")}
+              onClick={() => setMobileView("grid")}
             >
-              {mobileView === "grid" ? (
-                <>
-                  <Heart className="h-4 w-4 mr-1.5" />
-                  收藏清單
-                </>
-              ) : (
-                <>
-                  <Grid className="h-4 w-4 mr-1.5" />
-                  時程表
-                </>
-              )}
+              <Grid className="h-4 w-4 mr-1.5" />
+              時程表
             </button>
             
+            {/* Share button - only shown if favorites exist, switches TO favorites view */}
             {favorites.length > 0 && (
               <button 
                 type="button"
                 className={cn(
                   "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
-                  mobileView === "favorites" && "bg-primary text-primary-foreground font-medium"
+                  // Style the share button to indicate it leads to favorites view when active
+                  mobileView === "favorites" && "bg-primary text-primary-foreground font-medium" 
                 )}
+                // Share button now switches to the favorites view
                 onClick={() => setMobileView("favorites")}
               >
                 <Share2 className="h-4 w-4 mr-1.5" />

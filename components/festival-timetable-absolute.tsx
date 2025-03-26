@@ -403,7 +403,7 @@ function ImprovedGridView({
                     onClick={() => toggleFavorite(performance.id)}
                   >
                     <div className="flex-1 min-w-0 pr-6">
-                      <div className={cn("performance-title line-clamp-2", isMobile ? "text-xs" : "text-sm")}>
+                      <div className={cn("performance-title line-clamp-5", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>
                       <div className={cn("time-span", isMobile ? "text-[10px]" : "text-xs")}>

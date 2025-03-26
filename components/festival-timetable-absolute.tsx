@@ -11,7 +11,6 @@ import { useMobile } from "@/hooks/use-mobile"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { useFestivalData } from "./festival-data-provider"
-import { ExportSchedule } from "./export-schedule"
 
 // Festival days
 const festivalDays: FestivalDay[] = [
@@ -22,7 +21,6 @@ const festivalDays: FestivalDay[] = [
 export function FestivalTimetable() {
   const { stages } = useStages()
   const [favorites, setFavorites] = useState<string[]>(() => {
-    // Try to load favorites from localStorage on initial render
     if (typeof window !== 'undefined') {
       const savedFavorites = localStorage.getItem('festivalFavorites')
       return savedFavorites ? JSON.parse(savedFavorites) : []
@@ -35,18 +33,13 @@ export function FestivalTimetable() {
   const isMobile = useMobile()
   const { theme, setTheme } = useTheme()
 
-  // Generate time slots every 10 minutes
   const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
-
-  // Get performances from the FestivalDataProvider
   const { performances } = useFestivalData()
   
-  // Process performances to add timestamp information
   const processedPerformances = useMemo(() => {
     return performances.map((performance) => {
       const startTime = new Date(`${performance.date}T${performance.startTime}:00`).getTime()
       const endTime = new Date(`${performance.date}T${performance.endTime}:00`).getTime()
-
       return {
         ...performance,
         startTimestamp: startTime,
@@ -55,14 +48,15 @@ export function FestivalTimetable() {
     })
   }, [performances])
 
-  // Save favorites to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('festivalFavorites', JSON.stringify(favorites))
   }, [favorites])
 
   const toggleFavorite = (performanceId: string) => {
     setFavorites((prev) =>
-      prev.includes(performanceId) ? prev.filter((id) => id !== performanceId) : [...prev, performanceId],
+      prev.includes(performanceId)
+        ? prev.filter((id) => id !== performanceId)
+        : [...prev, performanceId]
     )
   }
 
@@ -98,23 +92,10 @@ export function FestivalTimetable() {
             favorites={favorites}
             toggleFavorite={toggleFavorite}
             selectedDate={selectedDate}
+            theme={theme}
           />
         )}
 
-        {/* Export section for mobile */}
-        {favorites.length > 0 && mobileView === "favorites" && (
-          <div>
-            <ExportSchedule
-              performances={processedPerformances}
-              favorites={favorites}
-              stages={stages}
-              selectedDate={selectedDate}
-              theme={theme || "light"}
-              onShare={() => setMobileView("grid")}
-            />
-          </div>
-        )}
-        
         {/* Floating filter button for grid view */}
         {mobileView === "grid" && (
           <button
@@ -126,10 +107,12 @@ export function FestivalTimetable() {
               showOnlyFavorites ? "bg-pink-50 dark:bg-pink-900" : ""
             )}
           >
-            <Heart className={cn(
-              "h-4 w-4 inline-block mr-1",
-              showOnlyFavorites ? "fill-pink-500 text-pink-500" : ""
-            )} />
+            <Heart
+              className={cn(
+                "h-4 w-4 inline-block mr-1",
+                showOnlyFavorites ? "fill-pink-500 text-pink-500" : ""
+              )}
+            />
             <span>{showOnlyFavorites ? "全部" : "篩選"}</span>
           </button>
         )}
@@ -213,24 +196,20 @@ export function FestivalTimetable() {
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
             className={cn(
               "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
-              "bg-white dark:bg-gray-800",
+              "bg-white dark:bg-gray-800"
             )}
           >
             <Heart
               className={cn(
                 "h-4 w-4",
-                showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : "",
+                showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : ""
               )}
             />
             <span>{showOnlyFavorites ? "僅顯示收藏" : "顯示全部"}</span>
           </button>
           
           {favorites.length > 0 && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setMobileView("favorites")}
-            >
+            <Button variant="outline" size="sm" onClick={() => setMobileView("favorites")}>
               <Share2 className="h-4 w-4 mr-2" />
               分享行程
             </Button>
@@ -248,23 +227,6 @@ export function FestivalTimetable() {
           isMobile={false}
           showOnlyFavorites={showOnlyFavorites}
         />
-        
-        {favorites.length > 0 && (
-          <div className={cn(mobileView === "favorites" ? "" : "border-t pt-6 mt-6")}>
-            <ExportSchedule
-              performances={processedPerformances}
-              favorites={favorites}
-              stages={stages}
-              selectedDate={selectedDate}
-              theme={theme || "light"}
-              onShare={() => {
-                // Desktop view doesn't need to switch views
-                // Just refresh to ensure state is updated
-                void(0)
-              }}
-            />
-          </div>
-        )}
       </div>
     </div>
   )
@@ -291,24 +253,17 @@ function ImprovedGridView({
 }: ImprovedGridViewProps) {
   const { stages } = useStages()
 
-  // Get stages to display
   const stagesToDisplay = useMemo(() => {
     if (!showOnlyFavorites) {
-      // Show all stages when not filtering by favorites
       return stages
     }
-    
-    // When showing only favorites, only include stages with favorited performances
     const stageIds = new Set(performances.filter((p) => favorites.includes(p.id)).map((p) => p.stageId))
     return stages.filter((stage) => stageIds.has(stage.id))
   }, [stages, performances, favorites, showOnlyFavorites])
 
-  // Calculate the total time range
   const firstSlotTime = timeSlots[0].timestamp
   const lastSlotTime = timeSlots[timeSlots.length - 1].timestamp
   const totalTimeRange = lastSlotTime - firstSlotTime
-
-  // Calculate row height - smaller for mobile
   const rowHeight = isMobile ? 20 : 30
 
   return (
@@ -318,7 +273,6 @@ function ImprovedGridView({
     )}>
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 
-      {/* Stage headers */}
       <div className="grid auto-cols-[minmax(120px,1fr)] grid-flow-col sticky top-0 z-20 bg-background">
         {stagesToDisplay.map((stage) => (
           <div key={stage.id} className={cn("p-2 font-bold text-center border-l border-b border-border", stage.color)}>
@@ -327,17 +281,12 @@ function ImprovedGridView({
         ))}
       </div>
 
-      {/* Time labels */}
       <div className="flex flex-col sticky left-0 z-10 bg-background border-r border-border">
-        {timeSlots.map((slot, index) => {
-          // Determine if this is an hour, half-hour, or 10-minute mark
+        {timeSlots.map((slot) => {
           const date = new Date(slot.timestamp)
           const isHourMark = date.getMinutes() === 0
           const isHalfHourMark = date.getMinutes() === 30
-
-          // Only show labels at hour and half-hour marks
           const showLabel = isHourMark || isHalfHourMark
-
           return (
             <div
               key={`time-${slot.timestamp}`}
@@ -354,7 +303,6 @@ function ImprovedGridView({
         })}
       </div>
 
-      {/* Grid content */}
       <div
         className="grid grid-flow-col relative"
         style={{
@@ -363,12 +311,10 @@ function ImprovedGridView({
       >
         {stagesToDisplay.map((stage) => (
           <div key={stage.id} className="relative border-l border-border min-h-full">
-            {timeSlots.map((slot, slotIndex) => {
-              // Determine line style based on time
+            {timeSlots.map((slot) => {
               const date = new Date(slot.timestamp)
               const isHourMark = date.getMinutes() === 0
               const isHalfHourMark = date.getMinutes() === 30
-
               return (
                 <div
                   key={`${stage.id}-${slot.timestamp}`}
@@ -381,20 +327,15 @@ function ImprovedGridView({
               )
             })}
 
-            {/* Performances for this stage */}
             {performances
               .filter((p) => p.stageId === stage.id)
               .map((performance) => {
                 const startTime = performance.startTimestamp || 0
                 const endTime = performance.endTimestamp || 0
-
-                // Calculate position and height
                 const startPosition = ((startTime - firstSlotTime) / totalTimeRange) * (timeSlots.length * rowHeight)
                 const endPosition = ((endTime - firstSlotTime) / totalTimeRange) * (timeSlots.length * rowHeight)
                 const height = endPosition - startPosition
-
                 const isFavorite = favorites.includes(performance.id)
-
                 return (
                   <button
                     key={performance.id}
@@ -422,7 +363,7 @@ function ImprovedGridView({
                       <Heart
                         className={cn(
                           isMobile ? "h-3 w-3" : "h-4 w-4",
-                          isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : "",
+                          isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : ""
                         )}
                       />
                     </div>
@@ -441,7 +382,6 @@ function generateTimeSlots(startTime: string, endTime: string, intervalMinutes: 
   let current = new Date(`${date}T${startTime}:00`)
   const end = new Date(`${date}T${endTime}:00`)
   let index = 0
-
   while (current <= end) {
     slots.push({
       time: current.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false }),
@@ -450,6 +390,5 @@ function generateTimeSlots(startTime: string, endTime: string, intervalMinutes: 
     })
     current = new Date(current.getTime() + intervalMinutes * 60000)
   }
-
   return slots
 }

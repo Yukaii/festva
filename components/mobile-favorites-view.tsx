@@ -1,15 +1,27 @@
 "use client"
+import { useState } from "react"
 import { useStages } from "./stage-provider"
 import type { Performance } from "@/types/festival"
-import { Heart, Share2 } from "lucide-react"
+import { Heart, Share2, Download } from "lucide-react"
+import { generateScheduleImage } from "@/lib/export-image"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface MobileFavoritesViewProps {
   performances: Performance[]
   favorites: string[]
   toggleFavorite: (id: string) => void
   selectedDate: string
+  theme: string | undefined // Accept string | undefined from useTheme
 }
 
 export function MobileFavoritesView({
@@ -17,8 +29,44 @@ export function MobileFavoritesView({
   favorites,
   toggleFavorite,
   selectedDate,
+  theme,
 }: MobileFavoritesViewProps) {
   const { stages } = useStages()
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const handleGenerateImage = async () => {
+    setIsGenerating(true)
+    setImageUrl(null) // Clear previous image
+    try {
+      const generatedImageUrl = await generateScheduleImage({
+        performances,
+        stages,
+        theme: theme === "dark" ? "dark" : "light",
+        isMobile: true,
+        selectedDate
+      });
+      setImageUrl(generatedImageUrl)
+      setIsDialogOpen(true) // Open dialog once image is ready
+    } catch (error) {
+      console.error("Error generating image:", error)
+      // Handle error (e.g., show a toast message)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleDownload = () => {
+    if (imageUrl) {
+      const a = document.createElement("a");
+      a.href = imageUrl;
+      a.download = `my-schedule-${selectedDate}.png`;
+      document.body.appendChild(a); // Required for Firefox
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
 
   // Group performances by time
   const performancesByTime = performances.reduce(
@@ -47,24 +95,36 @@ export function MobileFavoritesView({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Add share button at top */}
-      {performances.length > 0 && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const exportRef = document.getElementById("export-schedule-button");
-            if (exportRef) exportRef.click();
-          }}
-          className="w-full"
-        >
-          <Share2 className="h-4 w-4 mr-2" />
-          分享我的行程
-        </Button>
-      )}
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <div className="space-y-4">
-        {sortedTimes.map((time) => (
+        {/* Add share button at top */}
+        {performances.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleGenerateImage}
+            disabled={isGenerating}
+            className="w-full"
+          >
+            {isGenerating ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                  <title>Loading</title> {/* Added title */}
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /> {/* Self-closing */}
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /> {/* Self-closing */}
+                </svg>
+                產生中...
+              </>
+            ) : (
+              <>
+                <Share2 className="h-4 w-4 mr-2" />
+                分享我的行程
+              </>
+            )}
+          </Button>
+        )}
+        <div className="space-y-4">
+          {sortedTimes.map((time) => (
           <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">
             <div className="bg-gray-100 dark:bg-gray-800 p-2 font-medium border-b dark:border-gray-700">{time}</div>
             <div className="divide-y dark:divide-gray-800">
@@ -106,9 +166,35 @@ export function MobileFavoritesView({
               })}
             </div>
           </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+
+      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px]">
+        <DialogHeader>
+          <DialogTitle>我的行程 ({selectedDate})</DialogTitle>
+          <DialogDescription>
+            預覽你的個人化音樂祭行程表。點擊下載按鈕儲存圖片。
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4 max-h-[70vh] overflow-y-auto">
+          {imageUrl ? (
+            <img src={imageUrl} alt="Generated Schedule" className="w-full h-auto" />
+          ) : (
+            <div className="flex justify-center items-center h-40">
+              <p>圖片載入中...</p> {/* Or a spinner */}
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsDialogOpen(false)}>關閉</Button>
+          <Button onClick={handleDownload} disabled={!imageUrl}>
+            <Download className="h-4 w-4 mr-2" />
+            下載圖片
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

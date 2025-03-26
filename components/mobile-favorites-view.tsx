@@ -107,18 +107,20 @@ export function MobileFavoritesView({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <div className="space-y-4 pb-16">
-        {/* Add Day 1/Day 2 Tabs - Use local state */}
-        <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="2025-03-29">Day 1 (3/29)</TabsTrigger>
-            <TabsTrigger value="2025-03-30">Day 2 (3/30)</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Sticky container for Tabs and Share Button */}
+        <div className="sticky top-10 z-10 bg-background py-2 space-y-2"> {/* Added sticky container */}
+          {/* Add Day 1/Day 2 Tabs - Use local state */}
+          <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="2025-03-29">Day 1 (3/29)</TabsTrigger>
+              <TabsTrigger value="2025-03-30">Day 2 (3/30)</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-        {/* Add share button - Check filtered performances */}
-        {filteredPerformancesForDate.length > 0 && (
-          <Button
-            variant="outline"
+          {/* Add share button - Check filtered performances */}
+          {filteredPerformancesForDate.length > 0 && (
+            <Button
+              variant="outline"
             size="sm"
             onClick={handleGenerateImage}
             disabled={isGenerating}
@@ -138,9 +140,11 @@ export function MobileFavoritesView({
                 <Share2 className="h-4 w-4 mr-2" />
                 分享我的行程
               </>
-            )}
-          </Button>
-        )}
+              )}
+            </Button>
+          )}
+        </div> {/* Close sticky container */}
+
         <div className="space-y-4">
           {sortedTimes.map((time) => (
           <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">

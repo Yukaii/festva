@@ -4,8 +4,9 @@ import { useStages } from "./stage-provider"
 import type { Performance } from "@/types/festival"
 import { Heart, Share2, Download } from "lucide-react"
 import { generateScheduleImage } from "@/lib/export-image"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Added Tabs import
 import {
   Dialog,
   DialogContent,
@@ -20,19 +21,23 @@ interface MobileFavoritesViewProps {
   performances: Performance[]
   favorites: string[]
   toggleFavorite: (id: string) => void
-  selectedDate: string
-  theme: string | undefined // Accept string | undefined from useTheme
+  selectedDate: string; // Keep selectedDate to initialize local state
+  theme: string | undefined; // Accept string | undefined from useTheme
+  // Removed onDateChange prop type
 }
 
 export function MobileFavoritesView({
   performances,
   favorites,
   toggleFavorite,
-  selectedDate,
+  selectedDate, // Keep selectedDate prop for initialization
   theme,
+  // Removed onDateChange prop
 }: MobileFavoritesViewProps) {
-  const { stages } = useStages()
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const { stages } = useStages();
+  // Add local state for the date selected within the favorites view
+  const [favoritesSelectedDate, setFavoritesSelectedDate] = useState<string>(selectedDate);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -45,9 +50,9 @@ export function MobileFavoritesView({
         stages,
         theme: theme === "dark" ? "dark" : "light",
         isMobile: true,
-        selectedDate
+        selectedDate: favoritesSelectedDate // Use local state for image generation
       });
-      setImageUrl(generatedImageUrl)
+      setImageUrl(generatedImageUrl);
       setIsDialogOpen(true) // Open dialog once image is ready
     } catch (error) {
       console.error("Error generating image:", error)
@@ -61,15 +66,18 @@ export function MobileFavoritesView({
     if (imageUrl) {
       const a = document.createElement("a");
       a.href = imageUrl;
-      a.download = `my-schedule-${selectedDate}.png`;
+      a.download = `my-schedule-${favoritesSelectedDate}.png`; // Use local state for download name
       document.body.appendChild(a); // Required for Firefox
       a.click();
       document.body.removeChild(a);
     }
   }
 
+  // Filter performances based on the locally selected date FIRST
+  const filteredPerformancesForDate = performances.filter(p => p.date === favoritesSelectedDate);
+
   // Group performances by time
-  const performancesByTime = performances.reduce(
+  const performancesByTime = filteredPerformancesForDate.reduce(
     (acc, performance) => {
       if (!acc[performance.startTime]) {
         acc[performance.startTime] = []
@@ -82,10 +90,12 @@ export function MobileFavoritesView({
 
   // Sort times
   const sortedTimes = Object.keys(performancesByTime).sort((a, b) => {
-    return new Date(`${selectedDate}T${a}:00`).getTime() - new Date(`${selectedDate}T${b}:00`).getTime()
+    // Use local state for sorting
+    return new Date(`${favoritesSelectedDate}T${a}:00`).getTime() - new Date(`${favoritesSelectedDate}T${b}:00`).getTime();
   })
 
-  if (performances.length === 0) {
+  // Check filtered performances for the selected date
+  if (filteredPerformancesForDate.length === 0) {
     return (
       <div className="text-center py-8 border rounded-lg dark:border-gray-800">
         <p className="text-gray-500 dark:text-gray-400">此日期沒有收藏的表演。</p>
@@ -97,8 +107,16 @@ export function MobileFavoritesView({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <div className="space-y-4">
-        {/* Add share button at top */}
-        {performances.length > 0 && (
+        {/* Add Day 1/Day 2 Tabs - Use local state */}
+        <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="2025-03-29">Day 1 (3/29)</TabsTrigger>
+            <TabsTrigger value="2025-03-30">Day 2 (3/30)</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Add share button - Check filtered performances */}
+        {filteredPerformancesForDate.length > 0 && (
           <Button
             variant="outline"
             size="sm"
@@ -169,12 +187,13 @@ export function MobileFavoritesView({
           ))}
         </div>
       </div>
-
+      {/* Dialog Content */}
       <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>我的行程 ({selectedDate})</DialogTitle>
+          {/* Use local state in Dialog Title */}
+          <DialogTitle>我的行程 ({favoritesSelectedDate})</DialogTitle>
           <DialogDescription>
-            預覽你的個人化音樂祭行程表。點擊下載按鈕儲存圖片。
+            預覽您個人化的音樂節行程。點擊下載按鈕儲存圖片。
           </DialogDescription>
         </DialogHeader>
         <div className="py-4 max-h-[70vh] overflow-y-auto">

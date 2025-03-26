@@ -98,6 +98,7 @@ export function FestivalTimetable() {
             toggleFavorite={toggleFavorite}
             selectedDate={selectedDate}
             theme={theme}
+            onDateChange={setSelectedDate} // Pass setSelectedDate as onDateChange
           />
         )}
 

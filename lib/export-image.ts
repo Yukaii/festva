@@ -21,36 +21,44 @@ export async function generateScheduleImage({
   if (typeof window === 'undefined') return null
 
   const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return null
+  // Create temporary canvas for text measurements
+  const measureCanvas = document.createElement('canvas')
+  const measureCtx = measureCanvas.getContext('2d')
+  if (!measureCtx) return null
+
+  const scaleFactor = 3 // Increase resolution
 
   try {
     // Helper function to get card dimensions and wrapped text
-    const getCardInfo = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
-      const words = text.split("")
-      let line = ""
-      const lines: string[] = []
-      
-      for (const char of words) {
-        const testLine = line + char
-        const testWidth = ctx.measureText(testLine).width
-        
-        if (testWidth > maxWidth) {
-          lines.push(line)
-          line = char
+    const getCardInfo = (text: string, maxWidth: number) => {
+      // Split text into array of characters for CJK support
+      const chars = Array.from(text);
+      let line = "";
+      const lines: string[] = [];
+
+      measureCtx.font = "bold 24px Arial"
+      for (let n = 0; n < chars.length; n++) {
+        const testLine = line + chars[n];
+        const testWidth = measureCtx.measureText(testLine).width;
+
+        if (testWidth > maxWidth && line) {
+          lines.push(line);
+          line = chars[n];
         } else {
-          line = testLine
+          line = testLine;
         }
       }
-      lines.push(line)
+      if (line) {
+        lines.push(line);
+      }
       
-      const cardHeight = lines.length > 1 ? 120 : 100 // Increased height for wrapped text
+      const cardHeight = lines.length > 1 ? 120 : 100
       return { lines, cardHeight }
     }
 
-    // Pre-calculate dimensions
-    const width = 500
-    const maxWidth = width - 150 // Consistent padding
+    // Pre-calculate base dimensions
+    const baseWidth = 500
+    const maxWidth = baseWidth - 150 // Consistent padding for text wrapping
     let totalHeight = 150 // Header space
 
     // Sort performances by date and start time
@@ -60,41 +68,49 @@ export async function generateScheduleImage({
       return dateA.getTime() - dateB.getTime();
     });
 
-    ctx.font = "bold 24px Arial"
+    // Get card dimensions using unscaled measurements
     const cardInfos = sortedPerformances.map(performance => 
-      getCardInfo(ctx, performance.name, maxWidth)
-    )
-    // Get unique dates for day markers
-    const uniqueDates = [...new Set(sortedPerformances.map(p => p.date))];
+      getCardInfo(performance.name, maxWidth)
+    );
 
-    // Calculate total height including spacing, day markers, and dividers
+    // Calculate total height including spacing and markers
     let previousDate = "";
-    const dayMarkerHeight = 25; // Height of the "Day X" text itself
-    const markerDividerPadding = 15; // Padding between marker and divider
-    const dividerBottomPadding = 20; // Padding below the divider
-    const dayHeaderTotalPadding = dayMarkerHeight + markerDividerPadding + dividerBottomPadding; // ~60px
+    const dayMarkerHeight = 25;
+    const markerDividerPadding = 15;
+    const dividerBottomPadding = 20;
+    const dayHeaderTotalPadding = dayMarkerHeight + markerDividerPadding + dividerBottomPadding;
 
     totalHeight += cardInfos.reduce((sum, info, index) => {
-      let spacing = info.cardHeight + 20; // Base spacing for card + padding below it
+      let spacing = info.cardHeight + 20;
       const currentDate = sortedPerformances[index].date;
       if (index === 0 || currentDate !== previousDate) {
-        // Add space for the Day marker + divider + padding below divider
-        spacing += dayHeaderTotalPadding; 
+        spacing += dayHeaderTotalPadding;
       }
       previousDate = currentDate;
       return sum + spacing;
     }, 0);
+
+    // Set up the canvas with proper dimensions
+    const baseHeight = Math.max(300, totalHeight + 30)
+    canvas.width = baseWidth * scaleFactor
+    canvas.height = baseHeight * scaleFactor
+
+    // Get drawing context and apply scaling
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
     
-    // Set canvas dimensions with extra padding
-    const height = Math.max(300, totalHeight + 30)
-    canvas.width = width
-    canvas.height = height
+    // Enable high quality image scaling
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
+    
+    // Apply scaling to the drawing context
+    ctx.scale(scaleFactor, scaleFactor)
     
     // Fill background based on theme
     ctx.fillStyle = theme === "dark" ? "#1f2937" : "#ffffff"
-    ctx.fillRect(0, 0, width, height)
+    ctx.fillRect(0, 0, baseWidth, baseHeight)
 
-    // Draw header
+    // Draw header (using base dimensions)
     ctx.fillStyle = theme === "dark" ? "#ffffff" : "#000000"
     ctx.font = "bold 32px Arial"
     ctx.fillText("我的大港聽團行程", 50, 60)
@@ -138,14 +154,14 @@ export async function generateScheduleImage({
         ctx.font = dayMarkerFont;
         ctx.fillStyle = theme === "dark" ? "#ffffff" : "#000000";
         ctx.textAlign = "center";
-        // Draw text slightly higher to account for baseline
-        ctx.fillText(`Day ${dayCounter}`, width / 2, yPos + dayMarkerHeight - 5); 
+        // Draw text slightly higher to account for baseline (using base dimensions)
+        ctx.fillText(`Day ${dayCounter}`, baseWidth / 2, yPos + dayMarkerHeight - 5); 
         ctx.textAlign = "left"; // Reset alignment
         yPos += dayMarkerHeight + markerDividerPadding; // Move yPos down past text and padding
 
-        // Draw divider line below marker
+        // Draw divider line below marker (using base dimensions)
         ctx.fillStyle = theme === "dark" ? "#4b5563" : "#d1d5db"; // Divider color
-        ctx.fillRect(50, yPos, width - 100, 2); // Draw line
+        ctx.fillRect(50, yPos, baseWidth - 100, 2); // Draw line
         yPos += dividerBottomPadding; // Add space after divider
       }
 
@@ -179,11 +195,11 @@ export async function generateScheduleImage({
       ctx.fillStyle = fillColor
       ctx.fillRect(50, yPos, 15, cardHeight)
       
-      // Draw performance card background
+      // Draw performance card background (using base dimensions)
       ctx.fillStyle = theme === "dark" ? "#374151" : "#f3f4f6"
-      ctx.fillRect(75, yPos, width - 125, cardHeight)
+      ctx.fillRect(75, yPos, baseWidth - 125, cardHeight)
       
-      // Draw performance name with wrapping
+      // Draw performance name with wrapping (using base dimensions)
       ctx.fillStyle = theme === "dark" ? "#ffffff" : "#000000"
       ctx.font = "bold 24px Arial"
       lines.forEach((line, lineIndex) => {
@@ -203,11 +219,12 @@ export async function generateScheduleImage({
       yPos += cardHeight + 20
     })
 
-    // Draw watermark
+    // Draw watermark (using base dimensions)
     ctx.fillStyle = theme === "dark" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"
     ctx.font = "16px Arial"
-    ctx.fillText("Festva 用心製作", width - 170, height - 20)
+    ctx.fillText("Festva 用心製作", baseWidth - 170, baseHeight - 20)
 
+    // Export the scaled image
     return canvas.toDataURL("image/png")
   } catch (error) {
     console.error("Error generating image:", error)

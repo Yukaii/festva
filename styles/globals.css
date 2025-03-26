@@ -47,16 +47,6 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --stage-color-1: #a3e635; /* Lime */
-    --stage-color-2: #d8b4fe; /* Purple */
-    --stage-color-3: #f472b6; /* Pink */
-    --stage-color-4: #38bdf8; /* Sky */
-    --stage-color-5: #fdba74; /* Orange */
-    --stage-color-6: #facc15; /* Yellow */
-    --stage-color-7: #ef4444; /* Red */
-    --stage-color-8: #1e40af; /* Blue */
-    --stage-color-9: #fb923c; /* Orange */
-    --stage-color-10: #b45309; /* Amber */
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -91,16 +81,6 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --stage-color-1: #84cc16; /* Dark Lime */
-    --stage-color-2: #c084fc; /* Dark Purple */
-    --stage-color-3: #ec4899; /* Dark Pink */
-    --stage-color-4: #0ea5e9; /* Dark Sky */
-    --stage-color-5: #fb923c; /* Dark Orange */
-    --stage-color-6: #eab308; /* Dark Yellow */
-    --stage-color-7: #dc2626; /* Dark Red */
-    --stage-color-8: #1d4ed8; /* Dark Blue */
-    --stage-color-9: #f97316; /* Dark Orange */
-    --stage-color-10: #92400e; /* Dark Amber */
   }
 }
 

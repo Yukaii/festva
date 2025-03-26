@@ -10,7 +10,7 @@ import { MobileFavoritesView } from "./mobile-favorites-view"
 import { useMobile } from "@/hooks/use-mobile"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
-import performances from '../data'
+import { useFestivalData } from "./festival-data-provider"
 
 // Festival days
 const festivalDays: FestivalDay[] = [
@@ -30,6 +30,9 @@ export function FestivalTimetable() {
   // Generate time slots every 10 minutes
   const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
 
+  // Get performances from the FestivalDataProvider
+  const { performances } = useFestivalData()
+  
   // Process performances to add timestamp information
   const processedPerformances = useMemo(() => {
     return performances.map((performance) => {
@@ -97,6 +100,7 @@ export function FestivalTimetable() {
           </Button>
 
           <button
+            type="button"
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
             className={cn(
               "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
@@ -149,6 +153,7 @@ export function FestivalTimetable() {
           </Button>
 
           <button
+            type="button"
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
             className={cn(
               "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
@@ -207,11 +212,11 @@ function ImprovedGridView({
     if (!showOnlyFavorites) {
       // Show all stages when not filtering by favorites
       return stages
-    } else {
-      // When showing only favorites, only include stages with favorited performances
-      const stageIds = new Set(performances.filter((p) => favorites.includes(p.id)).map((p) => p.stageId))
-      return stages.filter((stage) => stageIds.has(stage.id))
     }
+    
+    // When showing only favorites, only include stages with favorited performances
+    const stageIds = new Set(performances.filter((p) => favorites.includes(p.id)).map((p) => p.stageId))
+    return stages.filter((stage) => stageIds.has(stage.id))
   }, [stages, performances, favorites, showOnlyFavorites])
 
   // Calculate the total time range
@@ -224,7 +229,7 @@ function ImprovedGridView({
 
   return (
     <div className="festival-timetable">
-      <div className="time-header-cell"></div>
+      <div className="time-header-cell" />
 
       {/* Stage headers */}
       <div className="stage-headers">
@@ -248,7 +253,7 @@ function ImprovedGridView({
 
           return (
             <div
-              key={index}
+              key={`time-${slot.timestamp}`}
               className={cn(
                 "time-label",
                 isHourMark ? "hour-mark" : isHalfHourMark ? "half-hour-mark" : "ten-min-mark",
@@ -277,12 +282,12 @@ function ImprovedGridView({
 
               return (
                 <div
-                  key={`${stage.id}-${slotIndex}`}
+                  key={`${stage.id}-${slot.timestamp}`}
                   className={cn(
                     "time-cell",
                     isHourMark ? "hour-mark" : isHalfHourMark ? "half-hour-mark" : "ten-min-mark",
                   )}
-                ></div>
+                />
               )
             })}
 
@@ -290,8 +295,8 @@ function ImprovedGridView({
             {performances
               .filter((p) => p.stageId === stage.id)
               .map((performance) => {
-                const startTime = performance.startTimestamp!
-                const endTime = performance.endTimestamp!
+                const startTime = performance.startTimestamp || 0
+                const endTime = performance.endTimestamp || 0
 
                 // Calculate position and height
                 const startPosition = ((startTime - firstSlotTime) / totalTimeRange) * (timeSlots.length * rowHeight)
@@ -318,7 +323,7 @@ function ImprovedGridView({
                       <span className={cn("artist-name", isMobile ? "text-[10px]" : "text-xs")}>
                         {performance.artist}
                       </span>
-                      <button onClick={() => toggleFavorite(performance.id)} className="favorite-button">
+                      <button type="button" onClick={() => toggleFavorite(performance.id)} className="favorite-button">
                         <Heart
                           className={cn(
                             isMobile ? "h-3 w-3" : "h-4 w-4",

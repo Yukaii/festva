@@ -7,7 +7,7 @@ import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
 import { Heart, Grid, Moon, Sun, Calendar, Settings, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MobileFavoritesView } from "./mobile-favorites-view"
-import { useMobile } from "@/hooks/use-mobile"
+// import { useMobile } from "@/hooks/use-mobile" // No longer needed for mobile-first
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { useFestivalData } from "./festival-data-provider"
@@ -30,7 +30,7 @@ export function FestivalTimetable() {
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(festivalDays[0].date)
   const [mobileView, setMobileView] = useState<"grid" | "favorites">("grid")
-  const isMobile = useMobile()
+  // const isMobile = useMobile() // No longer needed for mobile-first
   const { theme, setTheme } = useTheme()
 
   const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
@@ -72,10 +72,10 @@ export function FestivalTimetable() {
     setTheme(theme === "dark" ? "light" : "dark")
   }
 
-  if (isMobile) {
-    return (
-      <div className="pb-[200px]">
-        {/* Main content area */}
+  // Mobile-first approach: Render mobile layout directly
+  return (
+    <div className="pb-[200px]">
+      {/* Main content area */}
         {mobileView === "grid" ? (
           <ImprovedGridView
             performances={filteredPerformances}
@@ -83,7 +83,7 @@ export function FestivalTimetable() {
             toggleFavorite={toggleFavorite}
             timeSlots={timeSlots}
             selectedDate={selectedDate}
-            isMobile={true}
+            // isMobile={true} // Prop will be removed from ImprovedGridView
             showOnlyFavorites={showOnlyFavorites}
           />
         ) : (
@@ -177,59 +177,8 @@ export function FestivalTimetable() {
           </div>
         </div>
       </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col space-y-6">
-      <div className="flex justify-between items-center">
-        <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
-
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm" onClick={toggleTheme}>
-            {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-            {theme === "dark" ? "亮色模式" : "暗色模式"}
-          </Button>
-
-          <button
-            type="button"
-            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={cn(
-              "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
-              "bg-white dark:bg-gray-800"
-            )}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4",
-                showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : ""
-              )}
-            />
-            <span>{showOnlyFavorites ? "僅顯示收藏" : "顯示全部"}</span>
-          </button>
-          
-          {favorites.length > 0 && (
-            <Button variant="outline" size="sm" onClick={() => setMobileView("favorites")}>
-              <Share2 className="h-4 w-4 mr-2" />
-              分享行程
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <ImprovedGridView
-          performances={filteredPerformances}
-          favorites={favorites}
-          toggleFavorite={toggleFavorite}
-          timeSlots={timeSlots}
-          selectedDate={selectedDate}
-          isMobile={false}
-          showOnlyFavorites={showOnlyFavorites}
-        />
-      </div>
-    </div>
   )
+  // Removed the desktop-specific return block
 }
 
 interface ImprovedGridViewProps {
@@ -238,7 +187,7 @@ interface ImprovedGridViewProps {
   toggleFavorite: (id: string) => void
   timeSlots: TimeSlotInfo[]
   selectedDate: string
-  isMobile: boolean
+  // isMobile: boolean // Removed prop
   showOnlyFavorites: boolean
 }
 
@@ -248,10 +197,11 @@ function ImprovedGridView({
   toggleFavorite,
   timeSlots,
   selectedDate,
-  isMobile,
+  // isMobile, // Removed prop
   showOnlyFavorites,
 }: ImprovedGridViewProps) {
   const { stages } = useStages()
+  const isMobile = true // Assume mobile for styling purposes now
 
   const stagesToDisplay = useMemo(() => {
     if (!showOnlyFavorites) {
@@ -264,12 +214,13 @@ function ImprovedGridView({
   const firstSlotTime = timeSlots[0].timestamp
   const lastSlotTime = timeSlots[timeSlots.length - 1].timestamp
   const totalTimeRange = lastSlotTime - firstSlotTime
-  const rowHeight = isMobile ? 20 : 30
+  const rowHeight = 20 // Use mobile row height directly
 
   return (
+    // Apply mobile styles directly
     <div className={cn(
       "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar",
-      isMobile ? "grid-cols-[50px_1fr]" : "grid-cols-[80px_1fr]"
+      "grid-cols-[50px_1fr]" // Use mobile grid columns directly
     )}>
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 
@@ -292,7 +243,7 @@ function ImprovedGridView({
               key={`time-${slot.timestamp}`}
               className={cn(
                 "h-[30px] flex items-center justify-center border-b border-border",
-                isMobile ? "text-xs px-0.5" : "text-sm",
+                "text-xs px-0.5", // Use mobile text size directly
                 isHourMark ? "font-bold border-b-2 border-foreground/70" : 
                 isHalfHourMark ? "border-b border-foreground/50" : ""
               )}
@@ -346,23 +297,23 @@ function ImprovedGridView({
                     )}
                     style={{
                       top: `${startPosition}px`,
-                      height: `${Math.max(height, isMobile ? 50 : 60)}px`,
-                      minHeight: isMobile ? "50px" : "60px"
+                      height: `${Math.max(height, 50)}px`, // Use mobile height directly
+                      minHeight: "50px" // Use mobile min-height directly
                     }}
                     onClick={() => toggleFavorite(performance.id)}
                   >
                     <div className="flex-1 min-w-0 pr-6 text-black">
-                      <div className={cn("font-bold line-clamp-5", isMobile ? "text-xs" : "text-sm")}>
+                      <div className={cn("font-bold line-clamp-5", "text-xs")}> {/* Use mobile text size */}
                         {performance.name}
                       </div>
-                      <div className={cn(isMobile ? "text-[10px]" : "text-xs text-gray-600 dark:text-gray-400")}>
+                      <div className={cn("text-[10px]")}> {/* Use mobile text size */}
                         {performance.startTime} - {performance.endTime}
                       </div>
                     </div>
                     <div className="absolute top-1 right-1">
                       <Heart
                         className={cn(
-                          isMobile ? "h-3 w-3" : "h-4 w-4",
+                          "h-3 w-3", // Use mobile icon size
                           isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : ""
                         )}
                       />

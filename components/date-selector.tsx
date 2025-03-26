@@ -12,7 +12,7 @@ interface DateSelectorProps {
 
 export function DateSelector({ days, selectedDate, onChange }: DateSelectorProps) {
   return (
-    <div className="flex items-center w-full">
+    <div className="flex items-center w-full md:w-auto md:min-w-[200px] md:max-w-[300px]">
       <Select value={selectedDate} onValueChange={onChange}>
         <SelectTrigger className="w-full">
           <div className="flex items-center">

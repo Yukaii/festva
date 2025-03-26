@@ -4,13 +4,14 @@ import { useState, useMemo } from "react"
 import { useStages } from "./stage-provider"
 import { DateSelector } from "./date-selector"
 import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
-import { Heart, Grid, Moon, Sun, Calendar, Settings } from "lucide-react"
+import { Heart, Grid, Moon, Sun, Calendar, Settings, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MobileFavoritesView } from "./mobile-favorites-view"
 import { useMobile } from "@/hooks/use-mobile"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { useFestivalData } from "./festival-data-provider"
+import { ExportSchedule } from "./export-schedule"
 
 // Festival days
 const festivalDays: FestivalDay[] = [
@@ -88,6 +89,19 @@ export function FestivalTimetable() {
           />
         )}
 
+        {/* Export section for mobile */}
+        {favorites.length > 0 && mobileView === "favorites" && (
+          <div className="mt-4 mb-16">
+            <ExportSchedule
+              performances={processedPerformances}
+              favorites={favorites}
+              stages={stages}
+              selectedDate={selectedDate}
+              theme={theme || "light"}
+            />
+          </div>
+        )}
+        
         {/* Mobile Tools Bar */}
         <div className="mobile-tools-bar">
           {/* Date selector section */}
@@ -130,6 +144,27 @@ export function FestivalTimetable() {
               {showOnlyFavorites ? "全部" : "篩選"}
             </button>
             
+            {favorites.length > 0 && (
+              <button 
+                type="button"
+                className={cn("mobile-tool-button", {
+                  "active": mobileView === "favorites",
+                  "bg-green-100 dark:bg-green-900": mobileView === "favorites"
+                })}
+                onClick={() => {
+                  if (mobileView !== "favorites") {
+                    setMobileView("favorites");
+                  } else {
+                    const exportRef = document.getElementById("export-schedule-button");
+                    if (exportRef) exportRef.click();
+                  }
+                }}
+              >
+                <Share2 className="mobile-tool-button-icon h-4 w-4" />
+                分享
+              </button>
+            )}
+
             <button 
               type="button"
               className="mobile-tool-button"
@@ -176,18 +211,46 @@ export function FestivalTimetable() {
             />
             <span>{showOnlyFavorites ? "僅顯示收藏" : "顯示全部"}</span>
           </button>
+          
+          {favorites.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                const exportRef = document.getElementById("export-schedule-button");
+                if (exportRef) exportRef.click();
+              }}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              分享行程
+            </Button>
+          )}
         </div>
       </div>
 
-      <ImprovedGridView
-        performances={filteredPerformances}
-        favorites={favorites}
-        toggleFavorite={toggleFavorite}
-        timeSlots={timeSlots}
-        selectedDate={selectedDate}
-        isMobile={false}
-        showOnlyFavorites={showOnlyFavorites}
-      />
+      <div className="space-y-6">
+        <ImprovedGridView
+          performances={filteredPerformances}
+          favorites={favorites}
+          toggleFavorite={toggleFavorite}
+          timeSlots={timeSlots}
+          selectedDate={selectedDate}
+          isMobile={false}
+          showOnlyFavorites={showOnlyFavorites}
+        />
+        
+        {favorites.length > 0 && (
+          <div className="border-t pt-6 mt-6">
+            <ExportSchedule
+              performances={processedPerformances}
+              favorites={favorites}
+              stages={stages}
+              selectedDate={selectedDate}
+              theme={theme || "light"}
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

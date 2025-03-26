@@ -183,9 +183,9 @@ export function ExportSchedule({
       })
 
       // Draw watermark
-      ctx.fillStyle = theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"
+      ctx.fillStyle = theme === "dark" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)"
       ctx.font = "16px Arial"
-      ctx.fillText("Festival Timetable App", width - 200, height - 20)
+      ctx.fillText("Festva 用心製作", width - 170, height - 20)
 
       // Convert canvas to image URL
       const imageUrl = canvas.toDataURL("image/png")

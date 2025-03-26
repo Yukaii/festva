@@ -7,8 +7,9 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <StageProvider>
         <FestivalDataProvider>
-          <div className="container mx-auto py-8 px-4 h-full max-h-full">
-            <h1 className="text-3xl font-bold text-center mb-8">大港開唱 2025</h1>
+          {/* Banner Title */}
+          <h1 className="text-lg font-bold text-center py-2 mb-3 w-full border-b border-border shadow-sm">大港開唱 2025</h1>
+          <div className="container mx-auto py-2 px-2 h-full max-h-full">
             <FestivalTimetable />
           </div>
         </FestivalDataProvider>

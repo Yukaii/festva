@@ -203,7 +203,7 @@ function ImprovedGridView({
   return (
     // Apply mobile styles directly
     <div className={cn(
-      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-260px)] relative border border-border scrollbar",
+      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar",
       "grid-cols-[50px_1fr]" // Use mobile grid columns directly
     )}>
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />

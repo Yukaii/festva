@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>大港開唱 2025 - Festival Timetable</title>
+        <title>大港開唱 2025 - Festva</title>
         <meta name="description" content="Interactive timetable for 大港開唱 2025" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="theme-color" content="#000000" />
@@ -35,7 +35,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black',
-    title: 'Festival Timetable'
+    title: 'Festva'
   }
 };
 

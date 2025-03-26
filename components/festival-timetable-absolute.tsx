@@ -4,10 +4,18 @@ import { useState, useMemo, useEffect } from "react"
 import { useStages } from "./stage-provider"
 import { DateSelector } from "./date-selector"
 import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
-import { Heart, Grid, Moon, Sun, Calendar, Settings, Share2 } from "lucide-react"
+import { Heart, Grid, Moon, Sun, Info, Share2 } from "lucide-react" // Added Info
 import { cn } from "@/lib/utils"
 import { MobileFavoritesView } from "./mobile-favorites-view"
 import { useTheme } from "next-themes"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog" // Added Dialog components
 import { useFestivalData } from "./festival-data-provider"
 
 // Festival days
@@ -29,6 +37,7 @@ export function FestivalTimetable() {
   const [selectedDate, setSelectedDate] = useState<string>(festivalDays[0].date)
   const [mobileView, setMobileView] = useState<"grid" | "favorites">("grid")
   const { theme, setTheme } = useTheme()
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false); // Added state for modal
 
   const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
   const { performances } = useFestivalData()
@@ -158,9 +167,41 @@ export function FestivalTimetable() {
             >
               {theme === "dark" 
                 ? <Sun className="h-4 w-4 mr-1.5" />
-                : <Moon className="h-4 w-4 mr-1.5" />
+                : <Moon className="h-4 w-4" />
               }
+              {/* Removed mr-1.5 from Moon/Sun icons as button is icon-only now */}
             </button>
+
+            {/* About Button & Modal */}
+            <Dialog open={isAboutModalOpen} onOpenChange={setIsAboutModalOpen}>
+              <DialogTrigger asChild>
+                <button 
+                  type="button"
+                  className="flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm"
+                  aria-label="About Festva"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>關於 Festva</DialogTitle>
+                  <DialogDescription>
+                    Festva 是一個簡單的音樂祭時間表應用程式，幫助您規劃您的音樂祭體驗。
+                    <br /><br />
+                    原始碼可在 GitHub 上找到：
+                    <a 
+                      href="https://github.com/Yukaii/festva" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline ml-1"
+                    >
+                      Yukaii/festva
+                    </a>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>

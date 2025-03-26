@@ -186,7 +186,7 @@ export function MobileFavoritesView({
             </div>
           )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
           <Button variant="outline" onClick={() => setIsDialogOpen(false)}>關閉</Button>
           <Button onClick={handleDownload} disabled={!imageUrl}>
             <Download className="h-4 w-4 mr-2" />

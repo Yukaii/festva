@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { useStages } from "./stage-provider"
 import { DateSelector } from "./date-selector"
 import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
-import { Heart, Grid, Moon, Sun } from "lucide-react"
+import { Heart, Grid, Moon, Sun, Calendar, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MobileFavoritesView } from "./mobile-favorites-view"
 import { useMobile } from "@/hooks/use-mobile"
@@ -67,58 +67,8 @@ export function FestivalTimetable() {
 
   if (isMobile) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
-
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMobileView("grid")}
-              className={cn("text-xs", mobileView === "grid" && "bg-primary text-primary-foreground")}
-            >
-              <Grid className="h-4 w-4 mr-1" />
-              Grid
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMobileView("favorites")}
-              className={cn("text-xs", mobileView === "favorites" && "bg-primary text-primary-foreground")}
-            >
-              <Heart className="h-4 w-4 mr-1" />
-              Favorites
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <Button variant="outline" size="sm" onClick={toggleTheme} className="text-xs">
-            {theme === "dark" ? <Sun className="h-4 w-4 mr-1" /> : <Moon className="h-4 w-4 mr-1" />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </Button>
-
-          <button
-            type="button"
-            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={cn(
-              "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
-              showOnlyFavorites
-                ? "bg-pink-100 border-pink-300 text-pink-800 dark:bg-pink-900 dark:border-pink-700 dark:text-pink-200"
-                : "bg-white dark:bg-gray-800",
-            )}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4",
-                showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : "",
-              )}
-            />
-            <span>{showOnlyFavorites ? "Showing favorites" : "Show favorites"}</span>
-          </button>
-        </div>
-
+      <div className="mobile-container">
+        {/* Main content area */}
         {mobileView === "grid" ? (
           <ImprovedGridView
             performances={filteredPerformances}
@@ -137,6 +87,62 @@ export function FestivalTimetable() {
             selectedDate={selectedDate}
           />
         )}
+
+        {/* Mobile Tools Bar */}
+        <div className="mobile-tools-bar">
+          {/* Date selector section */}
+          <div className="mobile-tools-section">
+            <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
+          </div>
+          
+          {/* View and action tools section */}
+          <div className="mobile-tools-section">
+            <button 
+              type="button"
+              className={cn("mobile-tool-button", mobileView === "grid" && "active")}
+              onClick={() => setMobileView("grid")}
+            >
+              <Grid className="mobile-tool-button-icon h-4 w-4" />
+              Grid
+            </button>
+            
+            <button 
+              type="button"
+              className={cn("mobile-tool-button", mobileView === "favorites" && "active")}
+              onClick={() => setMobileView("favorites")}
+            >
+              <Heart className={cn(
+                "mobile-tool-button-icon h-4 w-4",
+                mobileView === "favorites" && "fill-current"
+              )} />
+              Favorites
+            </button>
+            
+            <button 
+              type="button"
+              className={cn("mobile-tool-button", showOnlyFavorites && "active")}
+              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+            >
+              <Heart className={cn(
+                "mobile-tool-button-icon h-4 w-4",
+                showOnlyFavorites && "fill-current"
+              )} />
+              {showOnlyFavorites ? "All" : "Filter"}
+            </button>
+            
+            <button 
+              type="button"
+              className="mobile-tool-button"
+              onClick={toggleTheme}
+            >
+              {theme === "dark" 
+                ? <Sun className="mobile-tool-button-icon h-4 w-4" />
+                : <Moon className="mobile-tool-button-icon h-4 w-4" />
+              }
+              {theme === "dark" ? "Light" : "Dark"}
+            </button>
+          </div>
+        </div>
       </div>
     )
   }

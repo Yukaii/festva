@@ -216,9 +216,14 @@
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .festival-timetable {
+    grid-template-columns: 50px 1fr; /* Reduced from 80px to 50px */
+  }
+  
   .time-label {
     height: 20px;
-    font-size: 0.75rem;
+    font-size: 0.65rem; /* Reduced font size */
+    padding: 0 2px; /* Added minimal padding */
   }
 
   .time-cell {
@@ -228,6 +233,82 @@
   .performance-card {
     padding: 4px;
   }
+}
+
+/* Mobile tools bar */
+.mobile-tools-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  flex-direction: column; /* Changed to column to ensure sections stack vertically */
+  padding: 12px;
+  z-index: 50;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-tools-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 12px; /* Increased spacing between sections */
+}
+
+/* Make the date selector take full width and stand out more */
+.mobile-tools-section:first-child {
+  margin-bottom: 16px; /* More space after date selector */
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 12px;
+}
+
+.mobile-tools-section:first-child .flex {
+  width: 100%;
+}
+
+.mobile-tools-section:first-child [role="combobox"] {
+  width: 100%;
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.mobile-tools-section:last-child {
+  margin-bottom: 0;
+  flex-wrap: wrap; /* Allow buttons to wrap if needed */
+  gap: 8px; /* Add gap between buttons */
+}
+
+.mobile-tool-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  font-size: 0.8rem;
+  flex: 1; /* Allow buttons to grow and take equal space */
+  min-width: 70px; /* Ensure minimum width */
+  max-width: 120px; /* Limit maximum width */
+}
+
+.mobile-tool-button.active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 500;
+}
+
+.mobile-tool-button-icon {
+  margin-right: 6px;
+}
+
+/* Add padding to the bottom of the page to account for the fixed tools bar */
+.mobile-container {
+  padding-bottom: 150px; /* Increased padding to ensure content isn't hidden */
 }
 
 /* Scrollbar styling */
@@ -257,4 +338,3 @@
     @apply bg-background text-foreground;
   }
 }
-

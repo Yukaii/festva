@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useStages } from "./stage-provider"
 import { DateSelector } from "./date-selector"
 import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
@@ -21,7 +21,14 @@ const festivalDays: FestivalDay[] = [
 
 export function FestivalTimetable() {
   const { stages } = useStages()
-  const [favorites, setFavorites] = useState<string[]>([])
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    // Try to load favorites from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      const savedFavorites = localStorage.getItem('festivalFavorites')
+      return savedFavorites ? JSON.parse(savedFavorites) : []
+    }
+    return []
+  })
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(festivalDays[0].date)
   const [mobileView, setMobileView] = useState<"grid" | "favorites">("grid")
@@ -47,6 +54,11 @@ export function FestivalTimetable() {
       }
     })
   }, [performances])
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('festivalFavorites', JSON.stringify(favorites))
+  }, [favorites])
 
   const toggleFavorite = (performanceId: string) => {
     setFavorites((prev) =>
@@ -375,33 +387,33 @@ function ImprovedGridView({
                 const isFavorite = favorites.includes(performance.id)
 
                 return (
-                  <div
+                  <button
                     key={performance.id}
-                    className={cn("performance-card", stage.color)}
+                    type="button"
+                    className={cn("performance-card relative w-full text-left", stage.color)}
                     style={{
                       top: `${startPosition}px`,
                       height: `${Math.max(height, isMobile ? 30 : 40)}px`,
                     }}
+                    onClick={() => toggleFavorite(performance.id)}
                   >
-                    <div>
-                      <div className={cn("performance-title", isMobile ? "text-xs" : "text-sm")}>
+                    <div className="flex-1 min-w-0 pr-6">
+                      <div className={cn("performance-title truncate", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>
                       <div className={cn("time-span", isMobile ? "text-[10px]" : "text-xs")}>
                         {performance.startTime} - {performance.endTime}
                       </div>
                     </div>
-                    <div className="performance-footer">
-                      <button type="button" onClick={() => toggleFavorite(performance.id)} className="favorite-button">
-                        <Heart
-                          className={cn(
-                            isMobile ? "h-3 w-3" : "h-4 w-4",
-                            isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : "",
-                          )}
-                        />
-                      </button>
+                    <div className="absolute top-1 right-1">
+                      <Heart
+                        className={cn(
+                          isMobile ? "h-3 w-3" : "h-4 w-4",
+                          isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : "",
+                        )}
+                      />
                     </div>
-                  </div>
+                  </button>
                 )
               })}
           </div>

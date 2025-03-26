@@ -207,7 +207,7 @@ function ImprovedGridView({
   const firstSlotTime = timeSlots[0].timestamp
   const lastSlotTime = timeSlots[timeSlots.length - 1].timestamp
   const totalTimeRange = lastSlotTime - firstSlotTime
-  const rowHeight = 20 // Use mobile row height directly
+  const rowHeight = 30 // Match the h-[30px] used for time slots
 
   return (
     // Apply mobile styles directly

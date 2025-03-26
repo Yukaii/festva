@@ -7,8 +7,6 @@ import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
 import { Heart, Grid, Moon, Sun, Calendar, Settings, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { MobileFavoritesView } from "./mobile-favorites-view"
-// import { useMobile } from "@/hooks/use-mobile" // No longer needed for mobile-first
-import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { useFestivalData } from "./festival-data-provider"
 
@@ -30,7 +28,6 @@ export function FestivalTimetable() {
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(festivalDays[0].date)
   const [mobileView, setMobileView] = useState<"grid" | "favorites">("grid")
-  // const isMobile = useMobile() // No longer needed for mobile-first
   const { theme, setTheme } = useTheme()
 
   const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
@@ -83,7 +80,6 @@ export function FestivalTimetable() {
             toggleFavorite={toggleFavorite}
             timeSlots={timeSlots}
             selectedDate={selectedDate}
-            // isMobile={true} // Prop will be removed from ImprovedGridView
             showOnlyFavorites={showOnlyFavorites}
           />
         ) : (
@@ -187,7 +183,6 @@ interface ImprovedGridViewProps {
   toggleFavorite: (id: string) => void
   timeSlots: TimeSlotInfo[]
   selectedDate: string
-  // isMobile: boolean // Removed prop
   showOnlyFavorites: boolean
 }
 
@@ -197,11 +192,9 @@ function ImprovedGridView({
   toggleFavorite,
   timeSlots,
   selectedDate,
-  // isMobile, // Removed prop
   showOnlyFavorites,
 }: ImprovedGridViewProps) {
   const { stages } = useStages()
-  const isMobile = true // Assume mobile for styling purposes now
 
   const stagesToDisplay = useMemo(() => {
     if (!showOnlyFavorites) {

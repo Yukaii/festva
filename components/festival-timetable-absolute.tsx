@@ -92,33 +92,29 @@ export function FestivalTimetable() {
           />
         )}
 
-        {/* Floating filter button for grid view */}
-        {mobileView === "grid" && (
-          <button
-            type="button"
-            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={cn(
-              "fixed bottom-20 right-4 z-[100] rounded-full shadow-lg",
-              "px-4 py-2 text-sm border bg-background",
-              showOnlyFavorites ? "bg-pink-50 dark:bg-pink-900" : ""
-            )}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4 inline-block mr-1",
-                showOnlyFavorites ? "fill-pink-500 text-pink-500" : ""
-              )}
-            />
-            <span>{showOnlyFavorites ? "全部" : "篩選"}</span>
-          </button>
-        )}
-
         {/* Mobile Tools Bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border flex flex-col p-3 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-          {/* Date selector section */}
+          {/* Date selector and filter section */}
           {mobileView === "grid" && (
-            <div className="flex justify-center w-full mb-3 border-b border-border pb-3">
+            <div className="flex items-center gap-4 w-full mb-3 border-b border-border pb-3">
               <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
+              <button
+                type="button"
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className={cn(
+                  "flex items-center px-4 py-2 rounded-md text-sm whitespace-nowrap",
+                  "bg-secondary text-secondary-foreground ml-auto",
+                  showOnlyFavorites ? "bg-pink-50 dark:bg-pink-900" : ""
+                )}
+              >
+                <Heart
+                  className={cn(
+                    "h-4 w-4 mr-1.5",
+                    showOnlyFavorites ? "fill-pink-500 text-pink-500" : ""
+                  )}
+                />
+                {showOnlyFavorites ? "全部" : "篩選"}
+              </button>
             </div>
           )}
           

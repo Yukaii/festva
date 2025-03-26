@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  max-height: 100%;
+  height: 100%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -303,7 +308,7 @@
 
 /* Add padding to the bottom of the page to account for the fixed tools bar */
 .mobile-container {
-  padding-bottom: 150px; /* Increased padding to ensure content isn't hidden */
+  padding-bottom: 200px; /* Increased padding to ensure content isn't hidden */
 }
 
 /* Scrollbar styling */

@@ -153,14 +153,13 @@ export function FestivalTimetable() {
 
             <button 
               type="button"
-              className="flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]"
+              className="flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm"
               onClick={toggleTheme}
             >
               {theme === "dark" 
                 ? <Sun className="h-4 w-4 mr-1.5" />
                 : <Moon className="h-4 w-4 mr-1.5" />
               }
-              {theme === "dark" ? "亮色" : "暗色"}
             </button>
           </div>
         </div>

@@ -390,15 +390,16 @@ function ImprovedGridView({
                   <button
                     key={performance.id}
                     type="button"
-                    className={cn("performance-card relative w-full text-left", stage.color)}
+                    className={cn("performance-card relative w-full text-left overflow-hidden", stage.color)}
                     style={{
                       top: `${startPosition}px`,
-                      height: `${Math.max(height, isMobile ? 30 : 40)}px`,
+                      height: `${Math.max(height, isMobile ? 50 : 60)}px`,
+                      minHeight: isMobile ? "50px" : "60px"
                     }}
                     onClick={() => toggleFavorite(performance.id)}
                   >
                     <div className="flex-1 min-w-0 pr-6">
-                      <div className={cn("performance-title truncate", isMobile ? "text-xs" : "text-sm")}>
+                      <div className={cn("performance-title line-clamp-2", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>
                       <div className={cn("time-span", isMobile ? "text-[10px]" : "text-xs")}>

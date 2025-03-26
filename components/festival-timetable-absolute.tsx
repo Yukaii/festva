@@ -122,7 +122,7 @@ export function FestivalTimetable() {
             className={cn(
               "fixed bottom-20 right-4 z-50 rounded-full shadow-lg",
               "px-4 py-2 text-sm border bg-background",
-              showOnlyFavorites ? "bg-pink-100 border-pink-300 text-pink-800" : ""
+              showOnlyFavorites ? "" : ""
             )}
           >
             <Heart className={cn(
@@ -165,10 +165,7 @@ export function FestivalTimetable() {
             {favorites.length > 0 && (
               <button 
                 type="button"
-                className={cn("mobile-tool-button", {
-                  "active": mobileView === "favorites",
-                  "bg-green-100 dark:bg-green-900": mobileView === "favorites"
-                })}
+                className={cn("mobile-tool-button", mobileView === "favorites" && "active")}
                 onClick={() => {
                   if (mobileView !== "favorites") {
                     setMobileView("favorites");
@@ -216,9 +213,7 @@ export function FestivalTimetable() {
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
             className={cn(
               "flex items-center space-x-1 px-3 py-1.5 rounded-md border",
-              showOnlyFavorites
-                ? "bg-pink-100 border-pink-300 text-pink-800 dark:bg-pink-900 dark:border-pink-700 dark:text-pink-200"
-                : "bg-white dark:bg-gray-800",
+              "bg-white dark:bg-gray-800",
             )}
           >
             <Heart
@@ -404,7 +399,7 @@ function ImprovedGridView({
                     }}
                     onClick={() => toggleFavorite(performance.id)}
                   >
-                    <div className="flex-1 min-w-0 pr-6">
+                    <div className="flex-1 min-w-0 pr-6 text-black">
                       <div className={cn("performance-title line-clamp-5", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>

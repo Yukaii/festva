@@ -191,7 +191,6 @@
 
 .performance-title {
   font-weight: 700;
-  color: hsl(var(--foreground) / 0.9);
   font-size: 1.05rem;
 }
 
@@ -200,11 +199,6 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 8px;
-}
-
-.artist-name {
-  opacity: 0.75;
-  color: hsl(var(--foreground));
 }
 
 .favorite-button {

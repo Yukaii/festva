@@ -68,7 +68,7 @@ export function MobileFavoritesView({
                   <div key={performance.id} className="p-3">
                     <div className="flex justify-between items-start">
                       <div className="w-full pr-10">
-                        <div className="font-medium dark:text-gray-50">{performance.name}</div>
+                        <div className="font-medium">{performance.name}</div>
                         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                           <div className={cn("w-2 h-2 rounded-full mr-1", stage?.color || "bg-gray-300")} />
                           {stage?.name}

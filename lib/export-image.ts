@@ -64,14 +64,22 @@ export async function generateScheduleImage({
     const cardInfos = sortedPerformances.map(performance => 
       getCardInfo(ctx, performance.name, maxWidth)
     )
-    
-    // Calculate total height including spacing and potential dividers
+    // Get unique dates for day markers
+    const uniqueDates = [...new Set(sortedPerformances.map(p => p.date))];
+
+    // Calculate total height including spacing, day markers, and dividers
     let previousDate = "";
+    const dayMarkerHeight = 25; // Height of the "Day X" text itself
+    const markerDividerPadding = 15; // Padding between marker and divider
+    const dividerBottomPadding = 20; // Padding below the divider
+    const dayHeaderTotalPadding = dayMarkerHeight + markerDividerPadding + dividerBottomPadding; // ~60px
+
     totalHeight += cardInfos.reduce((sum, info, index) => {
-      let spacing = info.cardHeight + 20;
+      let spacing = info.cardHeight + 20; // Base spacing for card + padding below it
       const currentDate = sortedPerformances[index].date;
-      if (index > 0 && currentDate !== previousDate) {
-        spacing += 30; // Add space for divider line + padding
+      if (index === 0 || currentDate !== previousDate) {
+        // Add space for the Day marker + divider + padding below divider
+        spacing += dayHeaderTotalPadding; 
       }
       previousDate = currentDate;
       return sum + spacing;
@@ -110,17 +118,36 @@ export async function generateScheduleImage({
     // Draw performances
     let yPos = 150;
     let currentDrawingDate = "";
+    let dayCounter = 0;
+    const dayMarkerFont = "bold 20px Arial";
+    // Using constants defined in height calculation
+    // const dayMarkerHeight = 25; 
+    // const markerDividerPadding = 15;
+    // const dividerBottomPadding = 20;
+
     sortedPerformances.forEach((performance, index) => {
       const stage = stages.find((s) => s.id === performance.stageId);
       if (!stage) return;
 
-      // Check if date changed and draw divider
-      if (index > 0 && performance.date !== currentDrawingDate) {
+      // Check if date changed - Draw Day Header (Marker + Divider)
+      if (index === 0 || performance.date !== currentDrawingDate) {
+        dayCounter++;
+        currentDrawingDate = performance.date;
+        
+        // Draw Day marker text
+        ctx.font = dayMarkerFont;
+        ctx.fillStyle = theme === "dark" ? "#ffffff" : "#000000";
+        ctx.textAlign = "center";
+        // Draw text slightly higher to account for baseline
+        ctx.fillText(`Day ${dayCounter}`, width / 2, yPos + dayMarkerHeight - 5); 
+        ctx.textAlign = "left"; // Reset alignment
+        yPos += dayMarkerHeight + markerDividerPadding; // Move yPos down past text and padding
+
+        // Draw divider line below marker
         ctx.fillStyle = theme === "dark" ? "#4b5563" : "#d1d5db"; // Divider color
         ctx.fillRect(50, yPos, width - 100, 2); // Draw line
-        yPos += 30; // Add space after divider
+        yPos += dividerBottomPadding; // Add space after divider
       }
-      currentDrawingDate = performance.date;
 
       // Get pre-calculated card info
       const { lines, cardHeight } = cardInfos[index];

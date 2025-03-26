@@ -41,9 +41,9 @@ export function MobileFavoritesView({
 
   if (dateFilteredPerformances.length === 0) {
     return (
-      <div className="text-center py-8 border rounded-lg">
-        <p className="text-gray-500">此日期沒有收藏的表演。</p>
-        <p className="text-sm text-gray-400 mt-2">點擊表演上的愛心圖標來添加收藏。</p>
+      <div className="text-center py-8 border rounded-lg dark:border-gray-800">
+        <p className="text-gray-500 dark:text-gray-400">此日期沒有收藏的表演。</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">點擊表演上的愛心圖標來添加收藏。</p>
       </div>
     )
   }
@@ -52,9 +52,9 @@ export function MobileFavoritesView({
     <div className="space-y-4">
       <div className="space-y-4">
         {sortedTimes.map((time) => (
-          <div key={time} className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-100 p-2 font-medium border-b">{time}</div>
-            <div className="divide-y">
+          <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">
+            <div className="bg-gray-100 dark:bg-gray-800 p-2 font-medium border-b dark:border-gray-700">{time}</div>
+            <div className="divide-y dark:divide-gray-800">
               {performancesByTime[time].map((performance) => {
                 const stage = stages.find((s) => s.id === performance.stageId)
                 const isFavorite = favorites.includes(performance.id)
@@ -71,13 +71,13 @@ export function MobileFavoritesView({
                   <div key={performance.id} className="p-3">
                     <div className="flex justify-between items-start">
                       <div className="w-full pr-10">
-                        <div className="font-medium">{performance.name}</div>
-                        <div className="text-sm text-gray-500 flex items-center">
+                        <div className="font-medium dark:text-gray-50">{performance.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                           <div className={cn("w-2 h-2 rounded-full mr-1", stage?.color || "bg-gray-300")} />
                           {stage?.name}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">{duration}</div>
-                        <div className="mt-2 bg-gray-200 h-1 rounded-full w-full">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{duration}</div>
+                        <div className="mt-2 bg-gray-200 dark:bg-gray-700 h-1 rounded-full w-full">
                           <div
                             className={cn("h-full rounded-full", stage?.color || "bg-gray-400")}
                             style={{ width: `${durationPercentage}%` }}

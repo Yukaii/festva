@@ -71,7 +71,7 @@ export function FestivalTimetable() {
 
   // Mobile-first approach: Render mobile layout directly
   return (
-    <div> {/* Removed pb-[260px] */}
+    <div>
       {/* Main content area */}
         {mobileView === "grid" ? (
           <ImprovedGridView

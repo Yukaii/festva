@@ -80,7 +80,7 @@ export function FestivalTimetable() {
 
   if (isMobile) {
     return (
-      <div className="mobile-container">
+      <div className="pb-[200px]">
         {/* Main content area */}
         {mobileView === "grid" ? (
           <ImprovedGridView
@@ -134,29 +134,32 @@ export function FestivalTimetable() {
         )}
 
         {/* Mobile Tools Bar */}
-        <div className="mobile-tools-bar">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border flex flex-col p-3 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
           {/* Date selector section */}
           {mobileView === "grid" && (
-            <div className="mobile-tools-section">
+            <div className="flex justify-center w-full mb-3 border-b border-border pb-3">
               <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
             </div>
           )}
           
           {/* View and action tools section */}
-          <div className="mobile-tools-section">
+          <div className="flex justify-center w-full flex-wrap gap-2">
             <button 
               type="button"
-              className={cn("mobile-tool-button", mobileView === "favorites" && "active")}
+              className={cn(
+                "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
+                mobileView === "favorites" && "bg-primary text-primary-foreground font-medium"
+              )}
               onClick={() => setMobileView(mobileView === "grid" ? "favorites" : "grid")}
             >
               {mobileView === "grid" ? (
                 <>
-                  <Heart className="mobile-tool-button-icon h-4 w-4" />
+                  <Heart className="h-4 w-4 mr-1.5" />
                   收藏清單
                 </>
               ) : (
                 <>
-                  <Grid className="mobile-tool-button-icon h-4 w-4" />
+                  <Grid className="h-4 w-4 mr-1.5" />
                   時程表
                 </>
               )}
@@ -165,7 +168,10 @@ export function FestivalTimetable() {
             {favorites.length > 0 && (
               <button 
                 type="button"
-                className={cn("mobile-tool-button", mobileView === "favorites" && "active")}
+                className={cn(
+                  "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
+                  mobileView === "favorites" && "bg-primary text-primary-foreground font-medium"
+                )}
                 onClick={() => {
                   if (mobileView !== "favorites") {
                     setMobileView("favorites");
@@ -175,19 +181,19 @@ export function FestivalTimetable() {
                   }
                 }}
               >
-                <Share2 className="mobile-tool-button-icon h-4 w-4" />
+                <Share2 className="h-4 w-4 mr-1.5" />
                 分享
               </button>
             )}
 
             <button 
               type="button"
-              className="mobile-tool-button"
+              className="flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]"
               onClick={toggleTheme}
             >
               {theme === "dark" 
-                ? <Sun className="mobile-tool-button-icon h-4 w-4" />
-                : <Moon className="mobile-tool-button-icon h-4 w-4" />
+                ? <Sun className="h-4 w-4 mr-1.5" />
+                : <Moon className="h-4 w-4 mr-1.5" />
               }
               {theme === "dark" ? "亮色" : "暗色"}
             </button>
@@ -310,20 +316,20 @@ function ImprovedGridView({
   const rowHeight = isMobile ? 20 : 30
 
   return (
-    <div className="festival-timetable">
-      <div className="time-header-cell" />
+    <div className="grid grid-cols-[80px_1fr] grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar">
+      <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 
       {/* Stage headers */}
-      <div className="stage-headers">
+      <div className="grid auto-cols-[minmax(120px,1fr)] grid-flow-col sticky top-0 z-20 bg-background">
         {stagesToDisplay.map((stage) => (
-          <div key={stage.id} className={cn("stage-header", stage.color)}>
+          <div key={stage.id} className={cn("p-2 font-bold text-center border-l border-b border-border", stage.color)}>
             {stage.name}
           </div>
         ))}
       </div>
 
       {/* Time labels */}
-      <div className="time-labels">
+      <div className="flex flex-col sticky left-0 z-10 bg-background border-r border-border">
         {timeSlots.map((slot, index) => {
           // Determine if this is an hour, half-hour, or 10-minute mark
           const date = new Date(slot.timestamp)
@@ -337,8 +343,9 @@ function ImprovedGridView({
             <div
               key={`time-${slot.timestamp}`}
               className={cn(
-                "time-label",
-                isHourMark ? "hour-mark" : isHalfHourMark ? "half-hour-mark" : "ten-min-mark",
+                "h-[30px] flex items-center justify-center text-sm border-b border-border",
+                isHourMark ? "font-bold border-b-2 border-foreground/70" : 
+                isHalfHourMark ? "border-b border-foreground/50" : ""
               )}
             >
               {showLabel && slot.time}
@@ -349,13 +356,13 @@ function ImprovedGridView({
 
       {/* Grid content */}
       <div
-        className="grid-content"
+        className="grid grid-flow-col relative"
         style={{
           gridTemplateColumns: `repeat(${stagesToDisplay.length}, minmax(120px, 1fr))`,
         }}
       >
         {stagesToDisplay.map((stage) => (
-          <div key={stage.id} className="stage-column">
+          <div key={stage.id} className="relative border-l border-border min-h-full">
             {timeSlots.map((slot, slotIndex) => {
               // Determine line style based on time
               const date = new Date(slot.timestamp)
@@ -366,8 +373,9 @@ function ImprovedGridView({
                 <div
                   key={`${stage.id}-${slot.timestamp}`}
                   className={cn(
-                    "time-cell",
-                    isHourMark ? "hour-mark" : isHalfHourMark ? "half-hour-mark" : "ten-min-mark",
+                    "h-[30px] border-b border-border",
+                    isHourMark ? "border-b-2 border-foreground/70" : 
+                    isHalfHourMark ? "border-b border-foreground/50" : ""
                   )}
                 />
               )
@@ -391,7 +399,10 @@ function ImprovedGridView({
                   <button
                     key={performance.id}
                     type="button"
-                    className={cn("performance-card relative w-full text-left overflow-hidden", stage.color)}
+                    className={cn(
+                      "absolute w-[calc(100%-8px)] mx-1 rounded p-2 flex flex-col justify-between border border-border overflow-hidden text-left",
+                      stage.color
+                    )}
                     style={{
                       top: `${startPosition}px`,
                       height: `${Math.max(height, isMobile ? 50 : 60)}px`,
@@ -400,10 +411,10 @@ function ImprovedGridView({
                     onClick={() => toggleFavorite(performance.id)}
                   >
                     <div className="flex-1 min-w-0 pr-6 text-black">
-                      <div className={cn("performance-title line-clamp-5", isMobile ? "text-xs" : "text-sm")}>
+                      <div className={cn("font-bold line-clamp-5", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>
-                      <div className={cn("time-span", isMobile ? "text-[10px]" : "text-xs")}>
+                      <div className={cn(isMobile ? "text-[10px]" : "text-xs text-gray-600 dark:text-gray-400")}>
                         {performance.startTime} - {performance.endTime}
                       </div>
                     </div>

@@ -110,6 +110,7 @@ export function FestivalTimetable() {
               stages={stages}
               selectedDate={selectedDate}
               theme={theme || "light"}
+              onShare={() => setMobileView("grid")}
             />
           </div>
         )}
@@ -172,14 +173,7 @@ export function FestivalTimetable() {
                   "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
                   mobileView === "favorites" && "bg-primary text-primary-foreground font-medium"
                 )}
-                onClick={() => {
-                  if (mobileView !== "favorites") {
-                    setMobileView("favorites");
-                  } else {
-                    const exportRef = document.getElementById("export-schedule-button");
-                    if (exportRef) exportRef.click();
-                  }
-                }}
+                onClick={() => setMobileView("favorites")}
               >
                 <Share2 className="h-4 w-4 mr-1.5" />
                 分享
@@ -235,10 +229,7 @@ export function FestivalTimetable() {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => {
-                const exportRef = document.getElementById("export-schedule-button");
-                if (exportRef) exportRef.click();
-              }}
+              onClick={() => setMobileView("favorites")}
             >
               <Share2 className="h-4 w-4 mr-2" />
               分享行程
@@ -266,6 +257,11 @@ export function FestivalTimetable() {
               stages={stages}
               selectedDate={selectedDate}
               theme={theme || "light"}
+              onShare={() => {
+                // Desktop view doesn't need to switch views
+                // Just refresh to ensure state is updated
+                void(0)
+              }}
             />
           </div>
         )}

@@ -1,8 +1,9 @@
 "use client"
 import { useStages } from "./stage-provider"
 import type { Performance } from "@/types/festival"
-import { Heart } from "lucide-react"
+import { Heart, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface MobileFavoritesViewProps {
   performances: Performance[]
@@ -47,6 +48,21 @@ export function MobileFavoritesView({
 
   return (
     <div className="space-y-4">
+      {/* Add share button at top */}
+      {performances.length > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const exportRef = document.getElementById("export-schedule-button");
+            if (exportRef) exportRef.click();
+          }}
+          className="w-full"
+        >
+          <Share2 className="h-4 w-4 mr-2" />
+          分享我的行程
+        </Button>
+      )}
       <div className="space-y-4">
         {sortedTimes.map((time) => (
           <div key={time} className="border rounded-lg overflow-hidden dark:border-gray-800">

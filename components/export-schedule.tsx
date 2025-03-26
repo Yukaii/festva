@@ -18,6 +18,7 @@ interface ExportScheduleProps {
   stages: Stage[]
   selectedDate: string
   theme: string
+  onShare?: () => void
 }
 
 export function ExportSchedule({
@@ -26,6 +27,7 @@ export function ExportSchedule({
   stages,
   selectedDate,
   theme,
+  onShare,
 }: ExportScheduleProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -219,70 +221,103 @@ export function ExportSchedule({
         link.click()
         document.body.removeChild(link)
       }
+
+      if (onShare) {
+        onShare()
+      }
     } catch (error) {
       console.error("Error sharing image:", error)
     }
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">匯出我的行程表</h3>
-        <div className="flex space-x-2">
-          <Button
-            id="export-schedule-button"
-            variant="outline"
-            size="sm"
-            onClick={generateImage}
-            disabled={isGenerating || favoritePerformances.length === 0}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            {isGenerating ? "生成中..." : "生成圖片"}
-          </Button>
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">匯出我的行程表</h3>
+          <div className="flex space-x-2">
+            <Button
+              id="export-schedule-button"
+              variant="outline"
+              size="sm"
+              onClick={generateImage}
+              disabled={isGenerating || favoritePerformances.length === 0}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              {isGenerating ? "生成中..." : "生成圖片"}
+            </Button>
+            
+            {exportedImageUrl && (
+              <Button variant="default" size="sm" onClick={shareImage}>
+                <Download className="h-4 w-4 mr-2" />
+                分享
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {favoritePerformances.length === 0 && (
+          <div className="text-center py-8 border rounded-lg">
+            <p className="text-gray-500">沒有收藏的表演可以匯出。</p>
+            <p className="text-sm text-gray-400 mt-2">請先收藏表演以便匯出。</p>
+          </div>
+        )}
+
+        <div className="relative">
+          <canvas 
+            ref={canvasRef} 
+            className="hidden"
+          />
           
           {exportedImageUrl && (
-            <Button variant="default" size="sm" onClick={shareImage}>
-              <Download className="h-4 w-4 mr-2" />
-              分享
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {favoritePerformances.length === 0 && (
-        <div className="text-center py-8 border rounded-lg">
-          <p className="text-gray-500">沒有收藏的表演可以匯出。</p>
-          <p className="text-sm text-gray-400 mt-2">請先收藏表演以便匯出。</p>
-        </div>
-      )}
-
-      <div className="relative">
-        <canvas 
-          ref={canvasRef} 
-          className="hidden"
-        />
-        
-        {exportedImageUrl && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <div className="mt-4 border rounded-lg overflow-hidden cursor-pointer">
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="mt-4 border rounded-lg overflow-hidden cursor-pointer">
+                  <img 
+                    src={exportedImageUrl} 
+                    alt="匯出的行程表" 
+                    className="w-full h-auto"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
                 <img 
                   src={exportedImageUrl} 
                   alt="匯出的行程表" 
                   className="w-full h-auto"
                 />
-              </div>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <img 
-                src={exportedImageUrl} 
-                alt="匯出的行程表" 
-                className="w-full h-auto"
-              />
-            </DialogContent>
-          </Dialog>
-        )}
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
+    )
+  }
+
+  // Production or mobile - just show button and hidden canvas
+  return (
+    <div className="relative">
+      <canvas 
+        ref={canvasRef} 
+        className="hidden"
+      />
+      {favoritePerformances.length > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            await generateImage();
+            if (exportedImageUrl) {
+              await shareImage();
+            }
+          }}
+          disabled={isGenerating}
+          className="w-full"
+        >
+          <Share2 className="h-4 w-4 mr-2" />
+          {isGenerating ? "生成中..." : "分享我的行程"}
+        </Button>
+      )}
     </div>
   )
 }

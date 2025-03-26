@@ -103,7 +103,7 @@ export function FestivalTimetable() {
 
         {/* Export section for mobile */}
         {favorites.length > 0 && mobileView === "favorites" && (
-          <div className="mt-4 mb-16">
+          <div>
             <ExportSchedule
               performances={processedPerformances}
               favorites={favorites}
@@ -136,9 +136,11 @@ export function FestivalTimetable() {
         {/* Mobile Tools Bar */}
         <div className="mobile-tools-bar">
           {/* Date selector section */}
-          <div className="mobile-tools-section">
-            <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
-          </div>
+          {mobileView === "grid" && (
+            <div className="mobile-tools-section">
+              <DateSelector days={festivalDays} selectedDate={selectedDate} onChange={setSelectedDate} />
+            </div>
+          )}
           
           {/* View and action tools section */}
           <div className="mobile-tools-section">
@@ -256,7 +258,7 @@ export function FestivalTimetable() {
         />
         
         {favorites.length > 0 && (
-          <div className="border-t pt-6 mt-6">
+          <div className={cn(mobileView === "favorites" ? "" : "border-t pt-6 mt-6")}>
             <ExportSchedule
               performances={processedPerformances}
               favorites={favorites}

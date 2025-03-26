@@ -19,11 +19,8 @@ export function MobileFavoritesView({
 }: MobileFavoritesViewProps) {
   const { stages } = useStages()
 
-  // Filter performances by date
-  const dateFilteredPerformances = performances.filter((p) => p.date === selectedDate)
-
   // Group performances by time
-  const performancesByTime = dateFilteredPerformances.reduce(
+  const performancesByTime = performances.reduce(
     (acc, performance) => {
       if (!acc[performance.startTime]) {
         acc[performance.startTime] = []
@@ -39,7 +36,7 @@ export function MobileFavoritesView({
     return new Date(`${selectedDate}T${a}:00`).getTime() - new Date(`${selectedDate}T${b}:00`).getTime()
   })
 
-  if (dateFilteredPerformances.length === 0) {
+  if (performances.length === 0) {
     return (
       <div className="text-center py-8 border rounded-lg dark:border-gray-800">
         <p className="text-gray-500 dark:text-gray-400">此日期沒有收藏的表演。</p>

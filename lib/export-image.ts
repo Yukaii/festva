@@ -26,7 +26,7 @@ export async function generateScheduleImage({
   const measureCtx = measureCanvas.getContext('2d')
   if (!measureCtx) return null
 
-  const scaleFactor = 3 // Increase resolution
+  const scaleFactor = 2 // Increase resolution
 
   try {
     // Helper function to get card dimensions and wrapped text

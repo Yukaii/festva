@@ -316,7 +316,10 @@ function ImprovedGridView({
   const rowHeight = isMobile ? 20 : 30
 
   return (
-    <div className="grid grid-cols-[80px_1fr] grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar">
+    <div className={cn(
+      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar",
+      isMobile ? "grid-cols-[50px_1fr]" : "grid-cols-[80px_1fr]"
+    )}>
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 
       {/* Stage headers */}
@@ -343,7 +346,8 @@ function ImprovedGridView({
             <div
               key={`time-${slot.timestamp}`}
               className={cn(
-                "h-[30px] flex items-center justify-center text-sm border-b border-border",
+                "h-[30px] flex items-center justify-center border-b border-border",
+                isMobile ? "text-xs px-0.5" : "text-sm",
                 isHourMark ? "font-bold border-b-2 border-foreground/70" : 
                 isHalfHourMark ? "border-b border-foreground/50" : ""
               )}

@@ -14,8 +14,8 @@ import { useFestivalData } from "./festival-data-provider"
 
 // Festival days
 const festivalDays: FestivalDay[] = [
-  { id: "day1", date: "2025-03-29", name: "Day 1 (March 29)" },
-  { id: "day2", date: "2025-03-30", name: "Day 2 (March 30)" },
+  { id: "day1", date: "2025-03-29", name: "第一天 (3月29日)" },
+  { id: "day2", date: "2025-03-30", name: "第二天 (3月30日)" },
 ]
 
 export function FestivalTimetable() {
@@ -103,7 +103,7 @@ export function FestivalTimetable() {
               onClick={() => setMobileView("grid")}
             >
               <Grid className="mobile-tool-button-icon h-4 w-4" />
-              Grid
+              網格
             </button>
             
             <button 
@@ -115,7 +115,7 @@ export function FestivalTimetable() {
                 "mobile-tool-button-icon h-4 w-4",
                 mobileView === "favorites" && "fill-current"
               )} />
-              Favorites
+              收藏
             </button>
             
             <button 
@@ -127,7 +127,7 @@ export function FestivalTimetable() {
                 "mobile-tool-button-icon h-4 w-4",
                 showOnlyFavorites && "fill-current"
               )} />
-              {showOnlyFavorites ? "All" : "Filter"}
+              {showOnlyFavorites ? "全部" : "篩選"}
             </button>
             
             <button 
@@ -139,7 +139,7 @@ export function FestivalTimetable() {
                 ? <Sun className="mobile-tool-button-icon h-4 w-4" />
                 : <Moon className="mobile-tool-button-icon h-4 w-4" />
               }
-              {theme === "dark" ? "Light" : "Dark"}
+              {theme === "dark" ? "亮色" : "暗色"}
             </button>
           </div>
         </div>
@@ -155,7 +155,7 @@ export function FestivalTimetable() {
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm" onClick={toggleTheme}>
             {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            {theme === "dark" ? "亮色模式" : "暗色模式"}
           </Button>
 
           <button
@@ -174,7 +174,7 @@ export function FestivalTimetable() {
                 showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : "",
               )}
             />
-            <span>{showOnlyFavorites ? "Showing favorites" : "Show favorites"}</span>
+            <span>{showOnlyFavorites ? "顯示收藏" : "顯示收藏"}</span>
           </button>
         </div>
       </div>
@@ -324,11 +324,11 @@ function ImprovedGridView({
                       <div className={cn("performance-title", isMobile ? "text-xs" : "text-sm")}>
                         {performance.name}
                       </div>
+                      <div className={cn("time-span", isMobile ? "text-[10px]" : "text-xs")}>
+                        {performance.startTime} - {performance.endTime}
+                      </div>
                     </div>
                     <div className="performance-footer">
-                      <span className={cn("artist-name", isMobile ? "text-[10px]" : "text-xs")}>
-                        {performance.artist}
-                      </span>
                       <button type="button" onClick={() => toggleFavorite(performance.id)} className="favorite-button">
                         <Heart
                           className={cn(

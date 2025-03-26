@@ -10,8 +10,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>MegaPortFest 2025 - Festival Timetable</title>
-        <meta name="description" content="Interactive timetable for MegaPortFest 2025" />
+        <title>大港開唱 2025 - Festival Timetable</title>
+        <meta name="description" content="Interactive timetable for 大港開唱 2025" />
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>

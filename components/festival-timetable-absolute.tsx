@@ -114,6 +114,25 @@ export function FestivalTimetable() {
           </div>
         )}
         
+        {/* Floating filter button for grid view */}
+        {mobileView === "grid" && (
+          <button
+            type="button"
+            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+            className={cn(
+              "fixed bottom-20 right-4 z-50 rounded-full shadow-lg",
+              "px-4 py-2 text-sm border bg-background",
+              showOnlyFavorites ? "bg-pink-100 border-pink-300 text-pink-800" : ""
+            )}
+          >
+            <Heart className={cn(
+              "h-4 w-4 inline-block mr-1",
+              showOnlyFavorites ? "fill-pink-500 text-pink-500" : ""
+            )} />
+            <span>{showOnlyFavorites ? "全部" : "篩選"}</span>
+          </button>
+        )}
+
         {/* Mobile Tools Bar */}
         <div className="mobile-tools-bar">
           {/* Date selector section */}
@@ -125,35 +144,20 @@ export function FestivalTimetable() {
           <div className="mobile-tools-section">
             <button 
               type="button"
-              className={cn("mobile-tool-button", mobileView === "grid" && "active")}
-              onClick={() => setMobileView("grid")}
-            >
-              <Grid className="mobile-tool-button-icon h-4 w-4" />
-              網格
-            </button>
-            
-            <button 
-              type="button"
               className={cn("mobile-tool-button", mobileView === "favorites" && "active")}
-              onClick={() => setMobileView("favorites")}
+              onClick={() => setMobileView(mobileView === "grid" ? "favorites" : "grid")}
             >
-              <Heart className={cn(
-                "mobile-tool-button-icon h-4 w-4",
-                mobileView === "favorites" && "fill-current"
-              )} />
-              收藏
-            </button>
-            
-            <button 
-              type="button"
-              className={cn("mobile-tool-button", showOnlyFavorites && "active")}
-              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            >
-              <Heart className={cn(
-                "mobile-tool-button-icon h-4 w-4",
-                showOnlyFavorites && "fill-current"
-              )} />
-              {showOnlyFavorites ? "全部" : "篩選"}
+              {mobileView === "grid" ? (
+                <>
+                  <Heart className="mobile-tool-button-icon h-4 w-4" />
+                  收藏清單
+                </>
+              ) : (
+                <>
+                  <Grid className="mobile-tool-button-icon h-4 w-4" />
+                  時程表
+                </>
+              )}
             </button>
             
             {favorites.length > 0 && (

@@ -28,14 +28,9 @@ export function MobileView({
 }: MobileViewProps) {
   const { stages } = useStages()
   const { getEventTypeById } = useEventTypes()
-  const [selectedStage, setSelectedStage] = useState<string | null>(null)
-
-  const filteredPerformances = performances.filter((performance) => {
-    return !selectedStage || performance.stageId === selectedStage
-  })
 
   // Group performances by time
-  const performancesByTime = filteredPerformances.reduce(
+  const performancesByTime = performances.reduce(
     (acc, performance) => {
       if (!acc[performance.startTime]) {
         acc[performance.startTime] = []
@@ -52,54 +47,10 @@ export function MobileView({
   })
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSelectedStage(null)}
-            className={cn("text-xs", !selectedStage && "bg-primary text-primary-foreground")}
-          >
-            All Stages
-          </Button>
-
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs">
-                <Filter className="h-3 w-3 mr-1" />
-                Filters
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
-                <SheetDescription>Filter performances by stage and event type</SheetDescription>
-              </SheetHeader>
-              <div className="py-4 space-y-6">
-                <StageFilter />
-                <EventTypeFilter />
-                <div className="pt-2">
-                  <button
-                    onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-                    className={cn(
-                      "flex items-center space-x-1 px-3 py-1.5 rounded-md border w-full justify-center",
-                      showOnlyFavorites ? "bg-pink-100 border-pink-300 text-pink-800" : "bg-white",
-                    )}
-                  >
-                    <Heart className={cn("h-4 w-4", showOnlyFavorites ? "fill-pink-500 text-pink-500" : "")} />
-                    <span>{showOnlyFavorites ? "Showing favorites" : "Show favorites"}</span>
-                  </button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <div className="flex items-center text-sm text-gray-500">
-          <Calendar className="h-4 w-4 mr-1" />
-          <span>March 29, 2025</span>
-        </div>
+    <div className="space-y-4 relative pb-16">
+      <div className="flex justify-end text-sm text-gray-500">
+        <Calendar className="h-4 w-4 mr-1" />
+        <span>March 29, 2025</span>
       </div>
 
       <div className="space-y-4">
@@ -143,7 +94,11 @@ export function MobileView({
                           />
                         </div>
                       </div>
-                      <button onClick={() => toggleFavorite(performance.id)} className="p-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleFavorite(performance.id)}
+                        className="p-2"
+                      >
                         <Heart className={cn("h-5 w-5", isFavorite ? "fill-red-500 text-red-500" : "text-gray-400")} />
                       </button>
                     </div>
@@ -154,6 +109,42 @@ export function MobileView({
           </div>
         ))}
       </div>
+
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg"
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+            <SheetDescription>Filter performances by stage and event type</SheetDescription>
+          </SheetHeader>
+          <div className="py-4 space-y-6">
+            <StageFilter />
+            <EventTypeFilter />
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className={cn(
+                  "flex items-center space-x-1 px-3 py-1.5 rounded-md border w-full justify-center",
+                  showOnlyFavorites ? "bg-pink-100 border-pink-300 text-pink-800" : "bg-white",
+                )}
+              >
+                <Heart className={cn("h-4 w-4", showOnlyFavorites ? "fill-pink-500 text-pink-500" : "")} />
+                <span>{showOnlyFavorites ? "Showing favorites" : "Show favorites"}</span>
+              </button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
@@ -167,10 +158,9 @@ function calculateDuration(startTime: string, endTime: string): string {
 
   if (durationMinutes < 60) {
     return `${durationMinutes} min`
-  } else {
-    const hours = Math.floor(durationMinutes / 60)
-    const minutes = durationMinutes % 60
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
   }
+  
+  const hours = Math.floor(durationMinutes / 60)
+  const minutes = durationMinutes % 60
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
 }
-

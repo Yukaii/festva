@@ -190,8 +190,9 @@
 }
 
 .performance-title {
-  font-weight: 500;
+  font-weight: 700;
   color: hsl(var(--foreground) / 0.9);
+  font-size: 1.05rem;
 }
 
 .performance-footer {

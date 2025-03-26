@@ -42,8 +42,8 @@ export function MobileFavoritesView({
   if (dateFilteredPerformances.length === 0) {
     return (
       <div className="text-center py-8 border rounded-lg">
-        <p className="text-gray-500">No favorite performances for this date.</p>
-        <p className="text-sm text-gray-400 mt-2">Add favorites by clicking the heart icon on performances.</p>
+        <p className="text-gray-500">此日期沒有收藏的表演。</p>
+        <p className="text-sm text-gray-400 mt-2">點擊表演上的愛心圖標來添加收藏。</p>
       </div>
     )
   }
@@ -84,7 +84,7 @@ export function MobileFavoritesView({
                           />
                         </div>
                       </div>
-                      <button onClick={() => toggleFavorite(performance.id)} className="p-2">
+                      <button type="button" onClick={() => toggleFavorite(performance.id)} className="p-2">
                         <Heart className={cn("h-5 w-5", isFavorite ? "fill-red-500 text-red-500" : "text-gray-400")} />
                       </button>
                     </div>
@@ -107,11 +107,10 @@ function calculateDuration(startTime: string, endTime: string): string {
   const durationMinutes = Math.floor(durationMs / 60000)
 
   if (durationMinutes < 60) {
-    return `${durationMinutes} min`
-  } else {
-    const hours = Math.floor(durationMinutes / 60)
-    const minutes = durationMinutes % 60
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
+    return `${durationMinutes} 分鐘`
   }
+  
+  const hours = Math.floor(durationMinutes / 60)
+  const minutes = durationMinutes % 60
+  return minutes > 0 ? `${hours}小時 ${minutes}分鐘` : `${hours}小時`
 }
-

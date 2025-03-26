@@ -174,7 +174,7 @@ export function FestivalTimetable() {
                 showOnlyFavorites ? "fill-pink-500 text-pink-500 dark:fill-pink-300 dark:text-pink-300" : "",
               )}
             />
-            <span>{showOnlyFavorites ? "顯示收藏" : "顯示收藏"}</span>
+            <span>{showOnlyFavorites ? "僅顯示收藏" : "顯示全部"}</span>
           </button>
         </div>
       </div>
@@ -356,7 +356,7 @@ function generateTimeSlots(startTime: string, endTime: string, intervalMinutes: 
 
   while (current <= end) {
     slots.push({
-      time: current.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
+      time: current.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false }),
       index: index++,
       timestamp: current.getTime(),
     })

@@ -166,10 +166,9 @@ export function FestivalTimetable() {
               onClick={toggleTheme}
             >
               {theme === "dark" 
-                ? <Sun className="h-4 w-4 mr-1.5" />
+                ? <Sun className="h-4 w-4" />
                 : <Moon className="h-4 w-4" />
               }
-              {/* Removed mr-1.5 from Moon/Sun icons as button is icon-only now */}
             </button>
 
             {/* About Button & Modal */}

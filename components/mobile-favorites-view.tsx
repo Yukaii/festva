@@ -106,7 +106,7 @@ export function MobileFavoritesView({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <div className="space-y-4">
+      <div className="space-y-4 pb-16">
         {/* Add Day 1/Day 2 Tabs - Use local state */}
         <Tabs value={favoritesSelectedDate} onValueChange={setFavoritesSelectedDate} className="w-full">
           <TabsList className="grid w-full grid-cols-2">

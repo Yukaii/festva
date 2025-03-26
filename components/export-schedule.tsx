@@ -1,10 +1,16 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Share2, Download } from "lucide-react"
 import type { Performance, Stage } from "@/types/festival"
 import { cn } from "@/lib/utils"
+import { useMobile } from "@/hooks/use-mobile"
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface ExportScheduleProps {
   performances: Performance[]
@@ -25,10 +31,20 @@ export function ExportSchedule({
   const [isGenerating, setIsGenerating] = useState(false)
   const [exportedImageUrl, setExportedImageUrl] = useState<string | null>(null)
 
-  // Filter performances to only include favorites for the selected date
-  const favoritePerformances = performances.filter(
-    (p) => favorites.includes(p.id) && p.date === selectedDate
-  )
+  const isMobile = useMobile()
+
+  // Get all favorites for mobile view, or just selected date for desktop
+  const favoritePerformances = useMemo(() => {
+    const allFavorites = performances.filter(p => favorites.includes(p.id))
+    if (isMobile) {
+      return allFavorites.sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date)
+        if (dateCompare !== 0) return dateCompare
+        return new Date(`${a.date}T${a.startTime}:00`).getTime() - new Date(`${b.date}T${b.startTime}:00`).getTime()
+      })
+    }
+    return allFavorites.filter(p => p.date === selectedDate)
+  }, [performances, favorites, selectedDate, isMobile])
 
   const generateImage = async () => {
     if (!canvasRef.current) return
@@ -41,8 +57,8 @@ export function ExportSchedule({
       if (!ctx) return
 
       // Set canvas dimensions
-      const width = 1200
-      const height = 800
+      const width = 500
+      const height = Math.max(300, 150 + favoritePerformances.length * 100) // Dynamic height based on number of performances
       canvas.width = width
       canvas.height = height
 
@@ -53,27 +69,27 @@ export function ExportSchedule({
       // Draw header
       ctx.fillStyle = theme === "dark" ? "#ffffff" : "#000000"
       ctx.font = "bold 32px Arial"
-      ctx.fillText("我的音樂節行程表", 50, 60)
+      ctx.fillText("我的大港聽團行程", 50, 60)
       
-      // Draw date
-      const dateObj = new Date(selectedDate)
-      const formattedDate = dateObj.toLocaleDateString("zh-TW", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        weekday: "long",
-      })
-      ctx.font = "24px Arial"
-      ctx.fillText(formattedDate, 50, 100)
-
-      // Sort performances by start time
-      const sortedPerformances = [...favoritePerformances].sort((a, b) => {
-        return new Date(`${a.date}T${a.startTime}:00`).getTime() - new Date(`${b.date}T${b.startTime}:00`).getTime()
-      })
+      // Handle dates
+      if (isMobile) {
+        ctx.font = "24px Arial"
+        ctx.fillText("3/29 (六) - 3/30 (日)", 50, 100)
+      } else {
+        const dateObj = new Date(selectedDate)
+        const formattedDate = dateObj.toLocaleDateString("zh-TW", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "long",
+        })
+        ctx.font = "24px Arial"
+        ctx.fillText(formattedDate, 50, 100)
+      }
 
       // Draw performances
       let yPos = 150
-      for (const performance of sortedPerformances) {
+      for (const performance of favoritePerformances) {
         const stage = stages.find((s) => s.id === performance.stageId)
         if (!stage) return
 
@@ -142,8 +158,9 @@ export function ExportSchedule({
         // Draw time and stage
         ctx.fillStyle = theme === "dark" ? "#d1d5db" : "#4b5563"
         ctx.font = "18px Arial"
+        const dateStr = isMobile ? `${performance.date.slice(5)} | ` : ""
         ctx.fillText(
-          `${performance.startTime} - ${performance.endTime} | ${stage.name}`,
+          `${dateStr}${performance.startTime} - ${performance.endTime} | ${stage.name}`,
           90,
           yPos + 60
         )
@@ -166,15 +183,31 @@ export function ExportSchedule({
     }
   }
 
-  const downloadImage = () => {
+  const shareImage = async () => {
     if (!exportedImageUrl) return
-    
-    const link = document.createElement("a")
-    link.href = exportedImageUrl
-    link.download = `festival-schedule-${selectedDate}.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+
+    try {
+      // Convert base64 to blob
+      const response = await fetch(exportedImageUrl)
+      const blob = await response.blob()
+      
+      if (navigator.share) {
+        await navigator.share({
+          title: '我的大港聽團行程',
+          files: [new File([blob], 'festival-schedule.png', { type: 'image/png' })]
+        })
+      } else {
+        // Fallback to download if Web Share API is not available
+        const link = document.createElement("a")
+        link.href = exportedImageUrl
+        link.download = `festival-schedule-${selectedDate}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } catch (error) {
+      console.error("Error sharing image:", error)
+    }
   }
 
   return (
@@ -194,9 +227,9 @@ export function ExportSchedule({
           </Button>
           
           {exportedImageUrl && (
-            <Button variant="default" size="sm" onClick={downloadImage}>
+            <Button variant="default" size="sm" onClick={shareImage}>
               <Download className="h-4 w-4 mr-2" />
-              下載
+              分享
             </Button>
           )}
         </div>
@@ -216,13 +249,24 @@ export function ExportSchedule({
         />
         
         {exportedImageUrl && (
-          <div className="mt-4 border rounded-lg overflow-hidden">
-            <img 
-              src={exportedImageUrl} 
-              alt="匯出的行程表" 
-              className="w-full h-auto"
-            />
-          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="mt-4 border rounded-lg overflow-hidden cursor-pointer">
+                <img 
+                  src={exportedImageUrl} 
+                  alt="匯出的行程表" 
+                  className="w-full h-auto"
+                />
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <img 
+                src={exportedImageUrl} 
+                alt="匯出的行程表" 
+                className="w-full h-auto"
+              />
+            </DialogContent>
+          </Dialog>
         )}
       </div>
     </div>

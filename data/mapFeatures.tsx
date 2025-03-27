@@ -129,7 +129,7 @@ export const mapFeatures = [
   },
   {
     id: "area-1743037087455",
-    name: "New Area",
+    name: "藍寶石",
     description: "New area feature",
     icon: <MapPin className="h-5 w-5" />,
     x: 529,

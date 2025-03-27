@@ -109,19 +109,19 @@ export function FeatureForm({ open, onClose, onSave, initialData, isEdit = false
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] dark:bg-gray-800 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Feature" : "Add New Feature"}</DialogTitle>
+          <DialogTitle className="dark:text-gray-100">{isEdit ? "Edit Feature" : "Add New Feature"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="id">Feature ID</Label>
-            <Input id="id" name="id" value={formData.id} readOnly className="bg-gray-100" />
+            <Label htmlFor="id" className="dark:text-gray-300">Feature ID</Label>
+            <Input id="id" name="id" value={formData.id} readOnly className="bg-gray-100 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" className="dark:text-gray-300">Name</Label>
             <Input
               id="name"
               name="name"
@@ -129,35 +129,37 @@ export function FeatureForm({ open, onClose, onSave, initialData, isEdit = false
               onChange={handleChange}
               placeholder="Feature name"
               required
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-400"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="dark:text-gray-300">Description</Label>
             <Input
               id="description"
               name="description"
               value={formData.description}
               onChange={handleChange}
               placeholder="Feature description"
+              className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-400"
             />
           </div>
 
           {!isEdit && (
             <div className="space-y-2">
-              <Label htmlFor="iconType">Icon Type</Label>
+              <Label htmlFor="iconType" className="dark:text-gray-300">Icon Type</Label>
               <Select value={formData.iconType} onValueChange={(value) => handleSelectChange("iconType", value)}>
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                   <SelectValue placeholder="Select icon type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="info">Information</SelectItem>
-                  <SelectItem value="food">Food</SelectItem>
-                  <SelectItem value="music">Music</SelectItem>
-                  <SelectItem value="restroom">Restroom</SelectItem>
-                  <SelectItem value="drink">Drinks</SelectItem>
-                  <SelectItem value="smoking">Smoking</SelectItem>
-                  <SelectItem value="pin">Map Pin</SelectItem>
+                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                  <SelectItem value="info" className="dark:text-gray-200 dark:focus:bg-gray-700">Information</SelectItem>
+                  <SelectItem value="food" className="dark:text-gray-200 dark:focus:bg-gray-700">Food</SelectItem>
+                  <SelectItem value="music" className="dark:text-gray-200 dark:focus:bg-gray-700">Music</SelectItem>
+                  <SelectItem value="restroom" className="dark:text-gray-200 dark:focus:bg-gray-700">Restroom</SelectItem>
+                  <SelectItem value="drink" className="dark:text-gray-200 dark:focus:bg-gray-700">Drinks</SelectItem>
+                  <SelectItem value="smoking" className="dark:text-gray-200 dark:focus:bg-gray-700">Smoking</SelectItem>
+                  <SelectItem value="pin" className="dark:text-gray-200 dark:focus:bg-gray-700">Map Pin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -165,23 +167,23 @@ export function FeatureForm({ open, onClose, onSave, initialData, isEdit = false
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="x">X Position</Label>
-              <Input id="x" name="x" type="number" value={formData.x} onChange={handleChange} required />
+              <Label htmlFor="x" className="dark:text-gray-300">X Position</Label>
+              <Input id="x" name="x" type="number" value={formData.x} onChange={handleChange} required className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="y">Y Position</Label>
-              <Input id="y" name="y" type="number" value={formData.y} onChange={handleChange} required />
+              <Label htmlFor="y" className="dark:text-gray-300">Y Position</Label>
+              <Input id="y" name="y" type="number" value={formData.y} onChange={handleChange} required className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
             </div>
           </div>
 
           {formData.width !== undefined && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="width">Width</Label>
-                <Input id="width" name="width" type="number" value={formData.width} onChange={handleChange} required />
+                <Label htmlFor="width" className="dark:text-gray-300">Width</Label>
+                <Input id="width" name="width" type="number" value={formData.width} onChange={handleChange} required className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="height">Height</Label>
+                <Label htmlFor="height" className="dark:text-gray-300">Height</Label>
                 <Input
                   id="height"
                   name="height"
@@ -189,20 +191,20 @@ export function FeatureForm({ open, onClose, onSave, initialData, isEdit = false
                   value={formData.height}
                   onChange={handleChange}
                   required
+                  className="dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
                 />
               </div>
             </div>
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-100">
               Cancel
             </Button>
-            <Button type="submit">{isEdit ? "Update" : "Add"} Feature</Button>
+            <Button type="submit" className="dark:bg-blue-600 dark:hover:bg-blue-700 dark:text-white">{isEdit ? "Update" : "Add"} Feature</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   )
 }
-

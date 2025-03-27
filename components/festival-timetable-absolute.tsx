@@ -98,7 +98,8 @@ export function FestivalTimetable() {
             toggleFavorite={toggleFavorite}
             selectedDate={selectedDate}
             theme={theme}
-            onDateChange={setSelectedDate} // Pass setSelectedDate as onDateChange
+            // Removed onDateChange prop as it's handled internally now
+            // onDateChange={setSelectedDate} 
           />
         )}
 
@@ -183,7 +184,8 @@ export function FestivalTimetable() {
                   <Info className="h-4 w-4" />
                 </button>
               </DialogTrigger>
-              <DialogContent>
+              {/* Updated max-height */}
+              <DialogContent className="max-h-[calc(100vh-40px)] overflow-y-auto w-[calc(100%-20px)] mx-auto">
                 <DialogHeader>
                   <DialogTitle>關於 Festva</DialogTitle>
                   <DialogDescription>

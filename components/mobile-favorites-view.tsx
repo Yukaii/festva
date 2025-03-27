@@ -198,8 +198,8 @@ export function MobileFavoritesView({
           </div>
         )}
       </div>
-      {/* Dialog Content */}
-      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px]">
+      {/* Dialog Content - Adjusted width and height, added flex layout */}
+      <DialogContent className="flex flex-col overflow-hidden max-h-[calc(100vh-40px)] w-[calc(100%-20px)] mx-auto">
         <DialogHeader>
           {/* Use local state in Dialog Title */}
           <DialogTitle>我的行程 ({favoritesSelectedDate})</DialogTitle>
@@ -207,9 +207,10 @@ export function MobileFavoritesView({
             預覽您個人化的音樂節行程。點擊下載按鈕儲存圖片。
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4 max-h-[70vh] overflow-y-auto">
+        {/* Image container: Made scrollable and flexible */}
+        <div className="py-4 flex-grow overflow-y-auto">
           {imageUrl ? (
-            <img src={imageUrl} alt="Generated Schedule" className="w-full h-auto" />
+            <img src={imageUrl} alt="Generated Schedule" className="w-full h-auto border-2 border-dashed border-gray-300 dark:border-gray-600" />
           ) : (
             <div className="flex justify-center items-center h-40">
               <p>圖片載入中...</p> {/* Or a spinner */}

@@ -6,18 +6,23 @@ import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import { Info, X, Move, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Add imports for the new components
 import { ContextMenu } from "@/components/context-menu"
 import { FeatureCreationGuide } from "@/components/feature-creation-guide"
 import { FeatureForm } from "@/components/feature-form"
 import { BottomSheet } from "@/components/bottom-sheet"
-import { useMobile } from "@/hooks/use-mobile"
-import { JSX } from "react/jsx-runtime"
-import { mapFeatures } from "@/data/mapFeatures"
+import { useMobile } from "@/hooks/use-mobile";
+import { JSX } from "react/jsx-runtime";
+import { mapFeatures } from "@/data/mapFeatures";
 
 // Define the types for our map features
 interface MapFeature {
@@ -39,13 +44,13 @@ export default function FestivalMapOverlay() {
   const [selectedFeature, setSelectedFeature] = useState<MapFeature | null>(null)
   const [debugMode, setDebugMode] = useState(false)
   const [draggingFeature, setDraggingFeature] = useState<string | null>(null)
-  const [resizingFeature, setResizingFeature] = useState<string | null>(null)
-  const [resizeHandle, setResizeHandle] = useState<ResizeHandle>(null)
-  const [features, setFeatures] = useState<MapFeature[]>([])
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
-  const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 })
-  const [scale, setScale] = useState(1)
-  const [fixedScale, setFixedScale] = useState(true) // New state for fixed scaling
+  const [resizingFeature, setResizingFeature] = useState<string | null>(null);
+  const [resizeHandle, setResizeHandle] = useState<ResizeHandle>(null);
+  const [features, setFeatures] = useState<MapFeature[]>([]);
+  // const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 }); // Removed, Popover handles position
+  const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
+  const [scale, setScale] = useState(1);
+  const [fixedScale, setFixedScale] = useState(true); // New state for fixed scaling
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; visible: boolean }>({
     x: 0,
     y: 0,
@@ -91,14 +96,14 @@ export default function FestivalMapOverlay() {
     })
 
     // Set as selected feature for tooltip
-    setSelectedFeature(feature)
+    setSelectedFeature(feature);
 
-    // Update tooltip position to be at the feature's center
-    setTooltipPosition({
-      x: featureX + featureWidth / 2,
-      y: featureY - 10, // Position slightly above the feature
-    })
-  }
+    // No need to set tooltip position manually with Popover
+    // setTooltipPosition({
+    //   x: featureX + featureWidth / 2,
+    //   y: featureY - 10, // Position slightly above the feature
+    // });
+  };
 
   // Handle feature selection from bottom sheet
   const handleSelectFeatureFromSheet = (feature: MapFeature) => {
@@ -143,18 +148,19 @@ export default function FestivalMapOverlay() {
 
   // Handle feature click
   const handleFeatureClick = (feature: MapFeature, e: React.MouseEvent) => {
-    if (debugMode) return
+    if (debugMode) return;
 
-    setSelectedFeature(feature)
+    // Toggle selection or select new feature
+    setSelectedFeature((prev) => (prev?.id === feature.id ? null : feature));
 
-    // Calculate tooltip position
-    const rect = mapContainerRef.current?.getBoundingClientRect()
-    if (rect) {
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      setTooltipPosition({ x, y })
-    }
-  }
+    // No need to calculate tooltip position manually
+    // const rect = mapContainerRef.current?.getBoundingClientRect();
+    // if (rect) {
+    //   const x = e.clientX - rect.left;
+    //   const y = e.clientY - rect.top;
+    //   setTooltipPosition({ x, y });
+    // }
+  };
 
   // Handle mouse down for dragging in debug mode
   const handleMouseDown = (featureId: string, e: React.MouseEvent) => {
@@ -520,127 +526,142 @@ export default function FestivalMapOverlay() {
             priority
           />
 
-          {/* Clickable overlays */}
+          {/* Clickable overlays with Popovers */}
           <div className="absolute top-0 left-0 w-full h-full">
             {features.map((feature) => (
-              <div
+              <Popover
                 key={feature.id}
-                className={`absolute ${debugMode ? "border-2 border-red-500 cursor-move" : "cursor-pointer hover:bg-opacity-50"}`}
-                style={{
-                  left: `${feature.x * scale}px`,
-                  top: `${feature.y * scale}px`,
-                  width: feature.width ? `${feature.width * scale}px` : "30px",
-                  height: feature.height ? `${feature.height * scale}px` : "30px",
-                  backgroundColor: debugMode ? "rgba(255, 0, 0, 0.2)" : feature.color || "transparent",
-                  transform: feature.width ? "none" : "translate(-50%, -50%)",
-                  borderRadius: feature.width ? "0" : "50%",
-                  zIndex: draggingFeature === feature.id || resizingFeature === feature.id ? 100 : 10,
-                }}
-                onClick={(e) => handleFeatureClick(feature, e)}
-                onMouseDown={(e) => handleMouseDown(feature.id, e)}
-                onDoubleClick={(e) => {
-                  e.stopPropagation()
-                  handleEditFeature(feature.id)
+                open={selectedFeature?.id === feature.id && !debugMode}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setSelectedFeature(null);
+                  }
                 }}
               >
-                {!feature.width && !debugMode && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-full dark:bg-gray-800 dark:bg-opacity-80">
+                {/* Outer div for visual representation, size, position, and click handling */}
+                <div
+                  className={`absolute ${debugMode ? "border-2 border-red-500 cursor-move" : "cursor-pointer hover:bg-opacity-50"}`}
+                  style={{
+                    left: `${feature.x * scale}px`,
+                      top: `${feature.y * scale}px`,
+                      width: feature.width ? `${feature.width * scale}px` : "30px",
+                      height: feature.height ? `${feature.height * scale}px` : "30px",
+                      backgroundColor: debugMode ? "rgba(255, 0, 0, 0.2)" : feature.color || "transparent",
+                      transform: feature.width ? "none" : "translate(-50%, -50%)",
+                      borderRadius: feature.width ? "0" : "50%",
+                      zIndex: draggingFeature === feature.id || resizingFeature === feature.id ? 100 : 10,
+                    }}
+                    onClick={(e) => handleFeatureClick(feature, e)}
+                    onMouseDown={(e) => handleMouseDown(feature.id, e)}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      handleEditFeature(feature.id);
+                    }}
+                  >
+                    {/* Inner, centered, invisible div to act as the PopoverTrigger anchor */}
+                    <PopoverTrigger asChild>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: '1px', // Small, invisible anchor
+                          height: '1px',
+                        }}
+                      />
+                    </PopoverTrigger>
+
+                    {/* Visual content of the feature */}
+                    {!feature.width && !debugMode && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-full dark:bg-gray-800 dark:bg-opacity-80">
+                        {feature.icon}
+                      </div>
+                    )}
+
+                    {debugMode && (
+                      <div className="absolute -top-6 left-0 bg-black text-white text-xs px-1 whitespace-nowrap">
+                        {feature.id}
+                      </div>
+                    )}
+
+                    {debugMode && (
+                      <div className="absolute top-0 left-0 right-0 flex justify-center">
+                        <Move className="h-4 w-4 text-red-500" />
+                      </div>
+                    )}
+
+                    {/* Resize handles for areas in debug mode */}
+                    {debugMode && feature.width && feature.height && (
+                      <>
+                        {/* Top handle */}
+                        <div
+                          className="absolute top-0 left-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-ns-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "top", e)}
+                        />
+
+                        {/* Right handle */}
+                        <div
+                          className="absolute top-1/2 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 -translate-y-1/2 cursor-ew-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "right", e)}
+                        />
+
+                        {/* Bottom handle */}
+                        <div
+                          className="absolute bottom-0 left-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 translate-y-1/2 cursor-ns-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "bottom", e)}
+                        />
+
+                        {/* Left handle */}
+                        <div
+                          className="absolute top-1/2 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-ew-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "left", e)}
+                        />
+
+                        {/* Corner handles */}
+                        <div
+                          className="absolute top-0 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "topLeft", e)}
+                        />
+
+                        <div
+                          className="absolute top-0 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 -translate-y-1/2 cursor-nesw-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "topRight", e)}
+                        />
+
+                        <div
+                          className="absolute bottom-0 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 translate-y-1/2 cursor-nesw-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "bottomLeft", e)}
+                        />
+
+                        <div
+                          className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 translate-y-1/2 cursor-nwse-resize"
+                          onMouseDown={(e) => handleResizeStart(feature.id, "bottomRight", e)}
+                        />
+
+                        {/* Size indicator */}
+                        <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-xs px-1 py-0.5">
+                          {feature.width} x {feature.height}
+                        </div>
+                      </>
+                    )}
+                  </div> {/* End of outer visual div */}
+
+                {/* Popover content remains the same, aligned to the centered trigger */}
+                <PopoverContent className="w-64 z-30" align="center">
+                  {/* Content for the popover */}
+                  <div className="flex items-center gap-2 mb-2">
                     {feature.icon}
+                    <h3 className="font-bold text-lg dark:text-white">{feature.name}</h3>
                   </div>
-                )}
-
-                {debugMode && (
-                  <div className="absolute -top-6 left-0 bg-black text-white text-xs px-1 whitespace-nowrap">
-                    {feature.id}
-                  </div>
-                )}
-
-                {debugMode && (
-                  <div className="absolute top-0 left-0 right-0 flex justify-center">
-                    <Move className="h-4 w-4 text-red-500" />
-                  </div>
-                )}
-
-                {/* Resize handles for areas in debug mode */}
-                {debugMode && feature.width && feature.height && (
-                  <>
-                    {/* Top handle */}
-                    <div
-                      className="absolute top-0 left-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-ns-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "top", e)}
-                    />
-
-                    {/* Right handle */}
-                    <div
-                      className="absolute top-1/2 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 -translate-y-1/2 cursor-ew-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "right", e)}
-                    />
-
-                    {/* Bottom handle */}
-                    <div
-                      className="absolute bottom-0 left-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 translate-y-1/2 cursor-ns-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "bottom", e)}
-                    />
-
-                    {/* Left handle */}
-                    <div
-                      className="absolute top-1/2 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-ew-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "left", e)}
-                    />
-
-                    {/* Corner handles */}
-                    <div
-                      className="absolute top-0 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-nwse-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "topLeft", e)}
-                    />
-
-                    <div
-                      className="absolute top-0 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 -translate-y-1/2 cursor-nesw-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "topRight", e)}
-                    />
-
-                    <div
-                      className="absolute bottom-0 left-0 w-4 h-4 bg-blue-500 rounded-full transform -translate-x-1/2 translate-y-1/2 cursor-nesw-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "bottomLeft", e)}
-                    />
-
-                    <div
-                      className="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 rounded-full transform translate-x-1/2 translate-y-1/2 cursor-nwse-resize"
-                      onMouseDown={(e) => handleResizeStart(feature.id, "bottomRight", e)}
-                    />
-
-                    {/* Size indicator */}
-                    <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-xs px-1 py-0.5">
-                      {feature.width} x {feature.height}
-                    </div>
-                  </>
-                )}
-              </div>
+                  <p>{feature.description}</p>
+                  {/* Close button is implicitly handled by Popover's onOpenChange */}
+                </PopoverContent>
+              </Popover>
             ))}
           </div>
 
-          {/* Information tooltip */}
-          {selectedFeature && !debugMode && (
-            <div
-              className="absolute bg-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg shadow-lg z-20 max-w-xs"
-              style={{
-                left: `${Math.min(tooltipPosition.x, mapDimensions.width - 250)}px`,
-                top: `${Math.min(tooltipPosition.y, mapDimensions.height - 150)}px`,
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                {selectedFeature.icon}
-                <h3 className="font-bold text-lg dark:text-white">{selectedFeature.name}</h3>
-              </div>
-              <p>{selectedFeature.description}</p>
-              <button
-                className="absolute top-1 right-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                onClick={() => setSelectedFeature(null)}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+          {/* Information tooltip - REMOVED, handled by Popover */}
 
           {/* Context Menu */}
           <ContextMenu

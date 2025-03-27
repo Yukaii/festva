@@ -61,7 +61,6 @@ export default function FestivalMapOverlay() {
   const [newFeatureSize, setNewFeatureSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 })
   const [showFeatureForm, setShowFeatureForm] = useState(false)
   const [editingFeature, setEditingFeature] = useState<MapFeature | null>(null)
-  const isMobile = useMobile()
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -527,7 +526,10 @@ export default function FestivalMapOverlay() {
       <div
         ref={mapContainerRef}
         className="relative overflow-auto rounded-lg shadow-lg dark:border dark:border-gray-700"
-        style={{ height: isMobile ? "calc(100vh - 180px)" : "auto" }}
+        style={{
+          height: "calc(100vh - 180px)",
+          overscrollBehaviorX: 'contain' // Prevent horizontal swipe navigation
+        }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}

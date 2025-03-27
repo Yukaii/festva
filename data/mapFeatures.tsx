@@ -4,9 +4,6 @@ import {
   Music,
   Cigarette,
   Bath,
-  X,
-  Move,
-  MapPin,
 } from "lucide-react";
 
 export const mapFeatures = [
@@ -24,30 +21,6 @@ export const mapFeatures = [
     isStage: true
   },
   {
-    id: "goddess-stage",
-    name: "女神龍",
-    description: "",
-    icon: <Music className="h-5 w-5" />,
-    x: 468,
-    y: 1125,
-    width: 119,
-    height: 147,
-    color: "rgba(249, 65, 68, 0.3)",
-    isStage: true
-  },
-  {
-    id: "stage-da-xiong-wan", // Renamed from area-1743037007471
-    name: "大雄丸",
-    description: "",
-    icon: <Music className="h-5 w-5" />,
-    x: 422,
-    y: 828,
-    width: 47,
-    height: 53,
-    color: "rgba(100, 100, 100, 0.3)",
-    isStage: true,
-  },
-  {
     id: "stage-hai-long-wang", // Renamed from area-1743037046891
     name: "海龍王",
     description: "",
@@ -60,27 +33,15 @@ export const mapFeatures = [
     isStage: true
   },
   {
-    id: "stage-qing-chun-meng", // Renamed from area-1743037065404
-    name: "青春夢",
+    id: "goddess-stage",
+    name: "女神龍",
     description: "",
     icon: <Music className="h-5 w-5" />,
-    x: 740,
-    y: 855,
-    width: 66,
-    height: 77,
-    color: "rgba(100, 100, 100, 0.3)",
-    isStage: true
-  },
-  {
-    id: "stage-lan-bao-shi", // Renamed from area-1743037087455
-    name: "藍寶石",
-    description: "",
-    icon: <Music className="h-5 w-5" />,
-    x: 529,
-    y: 757,
-    width: 57,
-    height: 50,
-    color: "rgba(100, 100, 100, 0.3)",
+    x: 468,
+    y: 1125,
+    width: 119,
+    height: 147,
+    color: "rgba(249, 65, 68, 0.3)",
     isStage: true
   },
   {
@@ -92,6 +53,18 @@ export const mapFeatures = [
     y: 755,
     width: 104,
     height: 44,
+    color: "rgba(100, 100, 100, 0.3)",
+    isStage: true
+  },
+  {
+    id: "stage-ka-mo-mai", // Renamed from area-1743037195555
+    name: "卡魔麥",
+    description: "",
+    icon: <Music className="h-5 w-5" />,
+    x: 79,
+    y: 275,
+    width: 39,
+    height: 159,
     color: "rgba(100, 100, 100, 0.3)",
     isStage: true
   },
@@ -108,6 +81,42 @@ export const mapFeatures = [
     isStage: true
   },
   {
+    id: "stage-da-xiong-wan", // Renamed from area-1743037007471
+    name: "大雄丸",
+    description: "",
+    icon: <Music className="h-5 w-5" />,
+    x: 422,
+    y: 828,
+    width: 47,
+    height: 53,
+    color: "rgba(100, 100, 100, 0.3)",
+    isStage: true,
+  },
+  {
+    id: "stage-lan-bao-shi", // Renamed from area-1743037087455
+    name: "藍寶石",
+    description: "",
+    icon: <Music className="h-5 w-5" />,
+    x: 529,
+    y: 757,
+    width: 57,
+    height: 50,
+    color: "rgba(100, 100, 100, 0.3)",
+    isStage: true
+  },
+  {
+    id: "stage-qing-chun-meng", // Renamed from area-1743037065404
+    name: "青春夢",
+    description: "",
+    icon: <Music className="h-5 w-5" />,
+    x: 740,
+    y: 855,
+    width: 66,
+    height: 77,
+    color: "rgba(100, 100, 100, 0.3)",
+    isStage: true
+  },
+  {
     id: "stage-xiao-gang-ji", // Renamed from area-1743037179506
     name: "小港祭",
     description: "",
@@ -116,18 +125,6 @@ export const mapFeatures = [
     y: 191,
     width: 70,
     height: 63,
-    color: "rgba(100, 100, 100, 0.3)",
-    isStage: true
-  },
-  {
-    id: "stage-ka-mo-mai", // Renamed from area-1743037195555
-    name: "卡魔麥",
-    description: "",
-    icon: <Music className="h-5 w-5" />,
-    x: 79,
-    y: 275,
-    width: 39,
-    height: 159,
     color: "rgba(100, 100, 100, 0.3)",
     isStage: true
   },

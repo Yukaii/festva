@@ -72,32 +72,27 @@ export default function FestivalMapOverlay() {
   // Initial features data
   useEffect(() => {
     setFeatures(mapFeatures)
-  }, [])
+   }, [])
 
-  // Center map on selected feature
-  const centerMapOnFeature = (feature: MapFeature) => {
-    if (!mapContainerRef.current || !feature) return
+   // Scrolls the map to center the given feature using scrollIntoView
+   const scrollToFeature = (feature: MapFeature) => { // Removed currentScale param
+     if (!mapContainerRef.current || !feature) return;
 
-    const containerRect = mapContainerRef.current.getBoundingClientRect()
-    const featureX = feature.x * scale
-    const featureY = feature.y * scale
-    const featureWidth = (feature.width || 30) * scale
-    const featureHeight = (feature.height || 30) * scale
+     const featureElementId = `feature-${feature.id}`;
+     const featureElement = document.getElementById(featureElementId);
 
-    // Calculate center position
-    const centerX = featureX - containerRect.width / 2 + featureWidth / 2
-    const centerY = featureY - containerRect.height / 2 + featureHeight / 2
+     if (featureElement) {
+       console.log(`Scrolling feature ${feature.id} into view.`);
+       featureElement.scrollIntoView({
+         behavior: 'smooth',
+         block: 'center', // Vertical alignment
+         inline: 'center' // Horizontal alignment
+       });
+     } else {
+       console.warn(`Could not find element with ID: ${featureElementId}`);
+     }
 
-    // Scroll to the position
-    mapContainerRef.current.scrollTo({
-      left: Math.max(0, centerX),
-      top: Math.max(0, centerY),
-      behavior: "smooth",
-    })
-
-    // Set as selected feature for tooltip
-    setSelectedFeature(feature);
-
+     // Note: State setting is removed, handled by handleSelectFeature
     // No need to set tooltip position manually with Popover
     // setTooltipPosition({
     //   x: featureX + featureWidth / 2,
@@ -105,10 +100,35 @@ export default function FestivalMapOverlay() {
     // });
   };
 
-  // Handle feature selection from bottom sheet
+  // Handles updating the selected feature state
+  const handleSelectFeature = (feature: MapFeature | null) => {
+    setSelectedFeature(feature);
+  };
+
+  // Handle feature selection from bottom sheet - updates state only
   const handleSelectFeatureFromSheet = (feature: MapFeature) => {
-    centerMapOnFeature(feature)
+    handleSelectFeature(feature);
+    // Scrolling is handled by the useEffect watching selectedFeature
   }
+
+  // Effect to scroll map when selectedFeature changes
+  useEffect(() => {
+    if (selectedFeature && mapContainerRef.current) {
+     // Increase delay slightly and use requestAnimationFrame for better timing before repaint
+     const timer = setTimeout(() => {
+       requestAnimationFrame(() => {
+         // scrollToFeature should handle the null check for selectedFeature internally now
+         // Call scrollToFeature using the selectedFeature from the closure
+         if (selectedFeature) { // Still need to ensure feature exists before calling
+            scrollToFeature(selectedFeature);
+         }
+       });
+     }, 150); // 150ms delay
+
+     return () => clearTimeout(timer); // Cleanup timeout
+    }
+  // Only trigger scroll effect when selectedFeature changes
+  }, [selectedFeature]);
 
   // Update map dimensions when the window resizes
   useEffect(() => {
@@ -122,17 +142,17 @@ export default function FestivalMapOverlay() {
           // Use a fixed scale based on a reference width (e.g., 1000px)
           const referenceWidth = 1000
           const newScale = referenceWidth / originalImageWidth
-          setScale(newScale)
+           setScale(newScale)
 
-          // Apply the scale to the container
-          if (mapContainerRef.current) {
-            mapContainerRef.current.style.width = `${originalImageWidth * newScale}px`
-            mapContainerRef.current.style.height = `${originalImageHeight * newScale}px`
-            mapContainerRef.current.style.overflow = "auto"
-          }
-        } else {
-          // Use responsive scaling based on container width
-          const newScale = width / originalImageWidth
+           // Apply the scale to the container - REMOVED direct style setting
+           // if (mapContainerRef.current) {
+           //   mapContainerRef.current.style.width = `${originalImageWidth * newScale}px`
+           //   mapContainerRef.current.style.height = `${originalImageHeight * newScale}px`
+           //   mapContainerRef.current.style.overflow = "auto"
+           // }
+         } else {
+           // Use responsive scaling based on container width
+           const newScale = width / originalImageWidth
           setScale(newScale)
         }
       }
@@ -146,12 +166,12 @@ export default function FestivalMapOverlay() {
     }
   }, [fixedScale, originalImageWidth, originalImageHeight])
 
-  // Handle feature click
+  // Handle feature click on the map
   const handleFeatureClick = (feature: MapFeature, e: React.MouseEvent) => {
     if (debugMode) return;
 
-    // Toggle selection or select new feature
-    setSelectedFeature((prev) => (prev?.id === feature.id ? null : feature));
+    // Toggle selection or select new feature using the state handler
+    handleSelectFeature(selectedFeature?.id === feature.id ? null : feature);
 
     // No need to calculate tooltip position manually
     // const rect = mapContainerRef.current?.getBoundingClientRect();
@@ -514,15 +534,23 @@ export default function FestivalMapOverlay() {
         onContextMenu={handleContextMenu}
         onClick={handleCloseContextMenu}
       >
-        <div className="relative">
-          {/* Original map image */}
+        {/* Inner container explicitly sized to scaled image dimensions */}
+        <div
+          className="relative"
+          style={{
+            width: `${originalImageWidth * scale}px`,
+            height: `${originalImageHeight * scale}px`,
+          }}
+        >
+          {/* Original map image - remove w-full/h-auto, use display:block */}
           <Image
             ref={imageRef}
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/25map_FIIIINAL-BSaUprHsOIgoBKmdVDzpeyCQbZlbl9.png"
             alt="MEGAPORT FEST. 2025 Map"
             width={originalImageWidth}
             height={originalImageHeight}
-            className="w-full h-auto"
+            // className="w-full h-auto" // Removed
+            style={{ display: 'block' }} // Added
             priority
           />
 
@@ -536,13 +564,14 @@ export default function FestivalMapOverlay() {
                   if (!open) {
                     setSelectedFeature(null);
                   }
-                }}
-              >
-                {/* Outer div for visual representation, size, position, and click handling */}
-                <div
-                  className={`absolute ${debugMode ? "border-2 border-red-500 cursor-move" : "cursor-pointer hover:bg-opacity-50"}`}
-                  style={{
-                    left: `${feature.x * scale}px`,
+                 }}
+               >
+                 {/* Outer div for visual representation, size, position, and click handling */}
+                 <div
+                   id={`feature-${feature.id}`} // Add unique ID for targeting
+                   className={`absolute ${debugMode ? "border-2 border-red-500 cursor-move" : "cursor-pointer hover:bg-opacity-50"}`}
+                   style={{
+                     left: `${feature.x * scale}px`,
                       top: `${feature.y * scale}px`,
                       width: feature.width ? `${feature.width * scale}px` : "30px",
                       height: feature.height ? `${feature.height * scale}px` : "30px",

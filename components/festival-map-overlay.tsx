@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
-import { Info, Utensils, Music, Cigarette, Bath, X, Move, MapPin } from "lucide-react"
+import { Info, X, Move, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -17,6 +17,7 @@ import { FeatureForm } from "@/components/feature-form"
 import { BottomSheet } from "@/components/bottom-sheet"
 import { useMobile } from "@/hooks/use-mobile"
 import { JSX } from "react/jsx-runtime"
+import { mapFeatures } from "@/data/mapFeatures"
 
 // Define the types for our map features
 interface MapFeature {
@@ -65,190 +66,7 @@ export default function FestivalMapOverlay() {
 
   // Initial features data
   useEffect(() => {
-    setFeatures([
-      {
-        id: "food-market",
-        name: "美食市集",
-        description: "Food market with various local and international cuisine options",
-        icon: <Utensils className="h-5 w-5" />,
-        x: 181,
-        y: 264,
-        width: 90,
-        height: 181,
-        color: "rgba(144, 190, 109, 0.3)",
-      },
-      {
-        id: "south-stage",
-        name: "南霸天",
-        description: "South stage featuring alternative and indie performances",
-        icon: <Music className="h-5 w-5" />,
-        x: 20,
-        y: 451,
-        width: 114,
-        height: 559,
-        color: "rgba(67, 170, 139, 0.3)",
-      },
-      {
-        id: "goddess-stage",
-        name: "女神龍",
-        description: "Goddess Dragon stage for electronic and dance music",
-        icon: <Music className="h-5 w-5" />,
-        x: 468,
-        y: 1125,
-        width: 119,
-        height: 147,
-        color: "rgba(249, 65, 68, 0.3)",
-      },
-      {
-        id: "restrooms-1",
-        name: "廁所",
-        description: "Restroom facilities",
-        icon: <Bath className="h-5 w-5" />,
-        x: 212,
-        y: 482,
-        width: 30,
-        height: 30,
-      },
-      {
-        id: "restrooms-2",
-        name: "廁所",
-        description: "Restroom facilities",
-        icon: <Bath className="h-5 w-5" />,
-        x: 404,
-        y: 111,
-        width: 51,
-        height: 61,
-      },
-      {
-        id: "food-area",
-        name: "飲食區",
-        description: "Designated eating areas with seating",
-        icon: <Utensils className="h-5 w-5" />,
-        x: 408,
-        y: 302,
-        width: 47,
-        height: 148,
-      },
-      {
-        id: "smoking",
-        name: "吸菸區",
-        description: "Designated smoking areas",
-        icon: <Cigarette className="h-5 w-5" />,
-        x: 35,
-        y: 208,
-        width: 44,
-        height: 54,
-      },
-      {
-        id: "info",
-        name: "服務台",
-        description: "Information booths for festival inquiries",
-        icon: <Info className="h-5 w-5" />,
-        x: 411,
-        y: 185,
-        width: 39,
-        height: 34,
-      },
-      {
-        id: "area-1743037007471",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 422,
-        y: 828,
-        width: 47,
-        height: 53,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037046891",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 735,
-        y: 1159,
-        width: 105,
-        height: 111,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037065404",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 740,
-        y: 855,
-        width: 66,
-        height: 77,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037087455",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 529,
-        y: 757,
-        width: 57,
-        height: 50,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037098604",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 588,
-        y: 755,
-        width: 104,
-        height: 44,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037118723",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 550,
-        y: 570,
-        width: 84,
-        height: 42,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037179506",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 212,
-        y: 191,
-        width: 70,
-        height: 63,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037195555",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 79,
-        y: 275,
-        width: 39,
-        height: 159,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-      {
-        id: "area-1743037218856",
-        name: "New Area",
-        description: "New area feature",
-        icon: <MapPin className="h-5 w-5" />,
-        x: 409,
-        y: 461,
-        width: 48,
-        height: 56,
-        color: "rgba(100, 100, 100, 0.3)",
-      },
-    ])
+    setFeatures(mapFeatures)
   }, [])
 
   // Center map on selected feature
@@ -664,17 +482,17 @@ export default function FestivalMapOverlay() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto bg-background text-foreground">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">MEGAPORT FEST. 2025</h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Switch id="debug-mode" checked={debugMode} onCheckedChange={setDebugMode} />
-            <Label htmlFor="debug-mode">Debug Mode</Label>
+            <Label htmlFor="debug-mode" className="dark:text-gray-300">Debug Mode</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch id="fixed-scale" checked={fixedScale} onCheckedChange={toggleFixedScale} />
-            <Label htmlFor="fixed-scale">Fixed Scale</Label>
+            <Label htmlFor="fixed-scale" className="dark:text-gray-300">Fixed Scale</Label>
           </div>
           {debugMode && <Button onClick={exportPositions}>Export Positions</Button>}
         </div>
@@ -682,7 +500,7 @@ export default function FestivalMapOverlay() {
 
       <div
         ref={mapContainerRef}
-        className="relative overflow-auto rounded-lg shadow-lg"
+        className="relative overflow-auto rounded-lg shadow-lg dark:border dark:border-gray-700"
         style={{ height: isMobile ? "calc(100vh - 180px)" : "auto" }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -726,7 +544,7 @@ export default function FestivalMapOverlay() {
                 }}
               >
                 {!feature.width && !debugMode && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-full">
+                  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 rounded-full dark:bg-gray-800 dark:bg-opacity-80">
                     {feature.icon}
                   </div>
                 )}
@@ -804,7 +622,7 @@ export default function FestivalMapOverlay() {
           {/* Information tooltip */}
           {selectedFeature && !debugMode && (
             <div
-              className="absolute bg-white p-4 rounded-lg shadow-lg z-20 max-w-xs"
+              className="absolute bg-white dark:bg-gray-900 dark:text-gray-100 p-4 rounded-lg shadow-lg z-20 max-w-xs"
               style={{
                 left: `${Math.min(tooltipPosition.x, mapDimensions.width - 250)}px`,
                 top: `${Math.min(tooltipPosition.y, mapDimensions.height - 150)}px`,
@@ -812,11 +630,11 @@ export default function FestivalMapOverlay() {
             >
               <div className="flex items-center gap-2 mb-2">
                 {selectedFeature.icon}
-                <h3 className="font-bold text-lg">{selectedFeature.name}</h3>
+                <h3 className="font-bold text-lg dark:text-white">{selectedFeature.name}</h3>
               </div>
               <p>{selectedFeature.description}</p>
               <button
-                className="absolute top-1 right-1 text-gray-500 hover:text-gray-700"
+                className="absolute top-1 right-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 onClick={() => setSelectedFeature(null)}
               >
                 <X className="h-4 w-4" />
@@ -874,7 +692,7 @@ export default function FestivalMapOverlay() {
       />
 
       {/* Mobile Bottom Sheet Navigation */}
-      {isMobile && !debugMode && (
+      {!debugMode && (
         <BottomSheet
           features={features}
           onSelectFeature={handleSelectFeatureFromSheet}
@@ -884,13 +702,13 @@ export default function FestivalMapOverlay() {
 
       {/* Debug console */}
       {debugMode && (
-        <Card className="mt-4 p-4 bg-gray-100">
-          <h2 className="text-lg font-bold mb-2">Debug Console</h2>
+        <Card className="mt-4 p-4 bg-gray-100 dark:bg-gray-900 dark:border-gray-700">
+          <h2 className="text-lg font-bold mb-2 dark:text-white">Debug Console</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="font-semibold mb-2">Feature Positions</h3>
+              <h3 className="font-semibold mb-2 dark:text-gray-200">Feature Positions</h3>
               <div className="max-h-60 overflow-y-auto">
-                <pre className="text-xs bg-gray-800 text-green-400 p-2 rounded">
+                <pre className="text-xs bg-gray-800 text-green-400 dark:bg-black dark:text-green-300 p-2 rounded">
                   {JSON.stringify(
                     features.map(({ id, x, y, width, height, name, description }) => ({
                       id,
@@ -908,8 +726,8 @@ export default function FestivalMapOverlay() {
               </div>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Instructions</h3>
-              <ul className="text-sm space-y-1">
+              <h3 className="font-semibold mb-2 dark:text-gray-200">Instructions</h3>
+              <ul className="text-sm space-y-1 dark:text-gray-300">
                 <li>• Drag the red boxes to position features</li>
                 <li>• Use blue resize handles to adjust area sizes</li>
                 <li>• Double-click any feature to edit its properties</li>
@@ -917,8 +735,8 @@ export default function FestivalMapOverlay() {
                 <li>• Toggle "Fixed Scale" to maintain consistent positioning</li>
               </ul>
               <div className="mt-4">
-                <h4 className="font-semibold">Map Scale: {scale.toFixed(3)}</h4>
-                <p className="text-sm text-gray-600">Original dimensions scaled to fit container</p>
+                <h4 className="font-semibold dark:text-gray-200">Map Scale: {scale.toFixed(3)}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Original dimensions scaled to fit container</p>
               </div>
             </div>
           </div>
@@ -927,4 +745,3 @@ export default function FestivalMapOverlay() {
     </div>
   )
 }
-

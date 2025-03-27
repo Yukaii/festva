@@ -27,7 +27,7 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
       case "collapsed":
         return "60px"
       case "compact":
-        return "150px"
+        return "120px" // Increased height again
       case "expanded":
         return "80vh"
       default:
@@ -105,13 +105,13 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
         )
       case "compact":
         return (
-          <div className="h-full flex flex-col">
+          <div className="h-full flex flex-col" style={{ height: `calc(${getHeight()} - 48px)` }}> {/* Adjusted height to account for the handle bar h-12 */}
             <div className="flex-1 flex items-center justify-between px-4 overflow-hidden">
               <button onClick={handlePrevious} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 z-10">
                 <ChevronLeft className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               </button>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2"> {/* Reduced gap */}
                 <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md">
                   {areaFeatures[activeIndex]?.icon}
                 </div>
@@ -123,7 +123,7 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
               </button>
             </div>
 
-            <div className="flex justify-center pb-2">
+            <div className="flex justify-center pb-1"> {/* Reduced bottom padding */}
               <div className="flex gap-1">
                 {areaFeatures.map((_, index) => (
                   <div

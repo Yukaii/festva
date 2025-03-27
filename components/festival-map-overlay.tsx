@@ -204,10 +204,12 @@ export default function FestivalMapOverlay() {
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
 
-    const rect = mapContainerRef.current?.getBoundingClientRect()
-    if (rect) {
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
+    const container = mapContainerRef.current
+    const rect = container?.getBoundingClientRect()
+    if (container && rect) {
+      // Adjust position by adding scroll offset
+      const x = e.clientX - rect.left + container.scrollLeft
+      const y = e.clientY - rect.top + container.scrollTop
 
       setContextMenu({
         x,

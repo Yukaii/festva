@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronUp, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, X } from "lucide-react" // Removed ChevronUp, ChevronDown
 import { motion } from "framer-motion"
 import { useMobile } from "@/hooks/use-mobile"
 
@@ -85,7 +85,21 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
         return (
           <div className="flex justify-center items-center h-full">
             <button onClick={toggleCollapse} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
-              <ChevronUp className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+              {/* Custom Up Angle (wider, smoother) */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-6 text-gray-800 dark:text-gray-200" // Adjusted width class
+              >
+                <path d="m18 15-6-3-6 3"></path> {/* Shallower angle */}
+              </svg>
             </button>
           </div>
         )
@@ -162,22 +176,63 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
       animate={{ height: getHeight() }}
       transition={{ type: "spring", damping: 30, stiffness: 300 }}
     >
-      {/* Handle bar */}
-      <div
-        className="h-12 flex items-center justify-center cursor-pointer border-b border-gray-200 dark:border-gray-700"
-        onClick={toggleExpand}
-      >
-        <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
-        <div className="absolute right-4">
-          {sheetState === "expanded" ? (
-            <Minimize2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          ) : sheetState === "compact" ? (
-            <Maximize2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          ) : (
-            <ChevronUp className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          )}
+      {/* Handle bar - Only shown when not collapsed */}
+      {sheetState !== "collapsed" && (
+        <div className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+          {/* Spacer to center the handle */}
+          <div className="w-8"></div> {/* Adjust width to match close button */}
+
+          {/* Central handle and expand/collapse toggle */}
+          <div
+            className="flex items-center justify-center cursor-pointer flex-grow" // Added flex-grow to center
+            onClick={toggleExpand} // Toggles between compact and expanded
+          >
+            {/* Custom Angle Icons */}
+            {sheetState === "expanded" ? (
+              // Custom Down Angle (wider, smoother)
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24" // Increased width for wider angle
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-6 text-gray-500 dark:text-gray-400" // Adjusted width class
+              >
+                <path d="m6 9 6 3 6-3"></path> {/* Shallower angle */}
+              </svg>
+            ) : sheetState === "compact" ? (
+              // Custom Up Angle (wider, smoother)
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24" // Increased width for wider angle
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-6 text-gray-500 dark:text-gray-400" // Adjusted width class
+              >
+                <path d="m18 15-6-3-6 3"></path> {/* Shallower angle */}
+              </svg>
+            ) : null}
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={() => setSheetState("collapsed")} // Always collapses the sheet
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Close bottom sheet"
+          >
+            <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       {renderContent()}

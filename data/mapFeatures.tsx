@@ -14,7 +14,7 @@ export const mapFeatures = [
   {
     id: "south-stage",
     name: "南霸天",
-    description: "South stage featuring alternative and indie performances",
+    description: "",
     icon: <Music className="h-5 w-5" />,
     x: 17,
     y: 458,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, X } from "lucide-react" // Removed ChevronUp, ChevronDown
+import { ChevronLeft, ChevronRight, X, Minus } from "lucide-react" // Added Minus
 import { motion } from "framer-motion"
 import { useMobile } from "@/hooks/use-mobile"
 
@@ -15,6 +15,7 @@ type SheetState = "collapsed" | "compact" | "expanded"
 
 export function BottomSheet({ features, onSelectFeature, selectedFeature }: BottomSheetProps) {
   const [sheetState, setSheetState] = useState<SheetState>("collapsed")
+  const [lastNonCollapsedState, setLastNonCollapsedState] = useState<"compact" | "expanded">("compact") // Remember last state
   const [activeIndex, setActiveIndex] = useState(0)
   const isMobile = useMobile()
 
@@ -35,23 +36,34 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
     }
   }
 
-  // Toggle between compact and expanded
+  // Toggle between compact and expanded, remembering the new state
   const toggleExpand = () => {
-    setSheetState(sheetState === "expanded" ? "compact" : "expanded")
+    const newState = sheetState === "expanded" ? "compact" : "expanded"
+    setSheetState(newState)
+    setLastNonCollapsedState(newState)
   }
 
-  // Toggle between collapsed and compact
+  // Toggle between collapsed and the last non-collapsed state
   const toggleCollapse = () => {
-    setSheetState(sheetState === "collapsed" ? "compact" : "collapsed")
+    setSheetState((currentState) => {
+      if (currentState === "collapsed") {
+        return lastNonCollapsedState // Return to the last remembered state
+      } else {
+        setLastNonCollapsedState(currentState as "compact" | "expanded") // Remember the current state before collapsing
+        return "collapsed"
+      }
+    })
   }
+
 
   // Handle feature selection
   const handleSelectFeature = (feature: any) => {
     // Always center and select the feature
     onSelectFeature(feature)
 
-    // If in expanded mode, collapse the sheet
+    // If in expanded mode, collapse the sheet (and remember it was expanded)
     if (sheetState === "expanded") {
+      setLastNonCollapsedState("expanded")
       setSheetState("collapsed")
     }
   }
@@ -179,53 +191,57 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
       {/* Handle bar - Only shown when not collapsed */}
       {sheetState !== "collapsed" && (
         <div className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
-          {/* Spacer to center the handle */}
-          <div className="w-8"></div> {/* Adjust width to match close button */}
-
-          {/* Central handle and expand/collapse toggle */}
-          <div
-            className="flex items-center justify-center cursor-pointer flex-grow" // Added flex-grow to center
-            onClick={toggleExpand} // Toggles between compact and expanded
-          >
-            {/* Custom Angle Icons */}
-            {sheetState === "expanded" ? (
-              // Custom Down Angle (wider, smoother)
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" // Increased width for wider angle
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-6 text-gray-500 dark:text-gray-400" // Adjusted width class
-              >
-                <path d="m6 9 6 3 6-3"></path> {/* Shallower angle */}
-              </svg>
-            ) : sheetState === "compact" ? (
-              // Custom Up Angle (wider, smoother)
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24" // Increased width for wider angle
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-6 text-gray-500 dark:text-gray-400" // Adjusted width class
-              >
-                <path d="m18 15-6-3-6 3"></path> {/* Shallower angle */}
-              </svg>
-            ) : null}
-          </div>
-
-          {/* Close button */}
+          {/* Left: Expand/Compact Toggle */}
           <button
-            onClick={() => setSheetState("collapsed")} // Always collapses the sheet
+            onClick={toggleExpand}
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label={sheetState === "expanded" ? "Compact sheet" : "Expand sheet"}
+          >
+            {sheetState === "expanded" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24" // Increased width for wider angle
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-6 text-gray-500 dark:text-gray-400"
+              >
+                <path d="m6 9 6 3 6-3"></path>
+              </svg>
+            ) : ( // sheetState === "compact"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-6 text-gray-500 dark:text-gray-400"
+              >
+                <path d="m18 15-6-3-6 3"></path>
+              </svg>
+            )}
+          </button>
+
+          {/* Center: Collapse Toggle */}
+          <button
+            onClick={toggleCollapse} // Toggles between current state and collapsed
+            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Collapse sheet"
+          >
+            <Minus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          </button>
+
+          {/* Right: Close button (Always collapses) */}
+          <button
+            onClick={() => setSheetState("collapsed")}
             className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Close bottom sheet"
           >

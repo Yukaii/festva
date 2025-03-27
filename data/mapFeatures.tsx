@@ -13,8 +13,7 @@ export const mapFeatures = [
   {
     id: "food-market",
     name: "美食市集",
-    description:
-      "Food market with various local and international cuisine options",
+    description: "Food market with various local and international cuisine options",
     icon: <Utensils className="h-5 w-5" />,
     x: 181,
     y: 264,
@@ -27,8 +26,8 @@ export const mapFeatures = [
     name: "南霸天",
     description: "South stage featuring alternative and indie performances",
     icon: <Music className="h-5 w-5" />,
-    x: 20,
-    y: 451,
+    x: 17,
+    y: 458,
     width: 114,
     height: 559,
     color: "rgba(67, 170, 139, 0.3)",
@@ -36,7 +35,7 @@ export const mapFeatures = [
   {
     id: "goddess-stage",
     name: "女神龍",
-    description: "Goddess Dragon stage for electronic and dance music",
+    description: "",
     icon: <Music className="h-5 w-5" />,
     x: 468,
     y: 1125,
@@ -107,8 +106,8 @@ export const mapFeatures = [
   },
   {
     id: "area-1743037046891",
-    name: "New Area",
-    description: "New area feature",
+    name: "海龍王",
+    description: "",
     icon: <MapPin className="h-5 w-5" />,
     x: 735,
     y: 1159,
@@ -118,8 +117,8 @@ export const mapFeatures = [
   },
   {
     id: "area-1743037065404",
-    name: "New Area",
-    description: "New area feature",
+    name: "青春夢",
+    description: "",
     icon: <MapPin className="h-5 w-5" />,
     x: 740,
     y: 855,

@@ -8,7 +8,7 @@ export default function Home() {
       <StageProvider>
         <FestivalDataProvider>
           {/* Banner Title */}
-          <h1 className="sticky top-0 z-10 bg-background text-lg font-bold text-center py-2 mb-3 w-full border-b border-border shadow-sm">大港開唱 2025</h1>
+          <h1 className="sticky top-0 z-10 h-10 bg-background text-lg font-bold text-center py-2 mb-3 w-full border-b border-border shadow-sm">大港開唱 2025</h1>
           <div className="container mx-auto py-2 px-2 h-full max-h-full">
             <FestivalTimetable />
           </div>

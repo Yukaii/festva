@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
-import { useStages } from "./stage-provider"
-import { DateSelector } from "./date-selector"
-import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival"
-import { Heart, Grid, Moon, Sun, Info, Share2 } from "lucide-react" // Added Info
-import { cn } from "@/lib/utils"
-import { MobileFavoritesView } from "./mobile-favorites-view"
-import { useTheme } from "next-themes"
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link"; // Import Link
+import { usePathname } from "next/navigation"; // Import usePathname
+import { useStages } from "./stage-provider";
+import { DateSelector } from "./date-selector";
+import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival";
+import { Heart, Grid, Moon, Sun, Info, Share2, Map, ArrowLeft } from "lucide-react"; // Added Map, ArrowLeft
+import { cn } from "@/lib/utils";
+import { MobileFavoritesView } from "./mobile-favorites-view";
+import { useTheme } from "next-themes";
 import {
   Dialog,
   DialogContent,
@@ -36,11 +38,12 @@ export function FestivalTimetable() {
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(festivalDays[0].date)
   const [mobileView, setMobileView] = useState<"grid" | "favorites">("grid")
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false); // Added state for modal
+  const pathname = usePathname(); // Get current path
 
-  const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate)
-  const { performances } = useFestivalData()
+  const timeSlots = generateTimeSlots("11:00", "23:50", 10, selectedDate);
+  const { performances } = useFestivalData();
   
   const processedPerformances = useMemo(() => {
     return performances.map((performance) => {
@@ -128,25 +131,55 @@ export function FestivalTimetable() {
               </button>
             </div>
           )}
-          
           {/* View and action tools section */}
           <div className="flex justify-center w-full flex-wrap gap-2">
-            {/* Always show Timetable button */}
-            <button
-              type="button"
-              className={cn(
-                "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
-                // Style to indicate when grid view is active
-                mobileView === "grid" && "bg-primary text-primary-foreground font-medium" 
-              )}
-              onClick={() => setMobileView("grid")}
-            >
-              <Grid className="h-4 w-4 mr-1.5" />
-              時程表
-            </button>
-            
-            {/* Share button - only shown if favorites exist, switches TO favorites view */}
-            {favorites.length > 0 && (
+            {/* Back Button (conditional) */}
+            {pathname !== "/" && (
+              <Link href="/" passHref>
+                <button
+                  type="button"
+                  className="flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm"
+                  aria-label="Back to Timetable"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              </Link>
+            )}
+
+            {/* Timetable Button */}
+            <Link href="/" passHref>
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
+                  // Style to indicate when grid view is active (and on root path)
+                  mobileView === "grid" && pathname === "/" && "bg-primary text-primary-foreground font-medium" 
+                )}
+                // Timetable button now navigates to root and sets view
+                onClick={() => setMobileView("grid")}
+              >
+                <Grid className="h-4 w-4 mr-1.5" />
+                時程表
+              </button>
+            </Link>
+
+            {/* Map Button */}
+            <Link href="/map" passHref>
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center justify-center px-3 py-2 rounded-md bg-secondary text-secondary-foreground text-sm flex-1 min-w-[70px] max-w-[120px]",
+                  // Style to indicate when map view is active
+                  pathname === "/map" && "bg-primary text-primary-foreground font-medium"
+                )}
+              >
+                <Map className="h-4 w-4 mr-1.5" />
+                地圖
+              </button>
+            </Link>
+
+            {/* Share/Favorites button - only shown if favorites exist, switches TO favorites view */}
+            {favorites.length > 0 && pathname === "/" && ( // Only show on timetable page
               <button 
                 type="button"
                 className={cn(

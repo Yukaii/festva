@@ -116,7 +116,7 @@ export function FestivalTimetable() {
                 type="button"
                 onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
                 className={cn(
-                  "flex items-center px-4 py-2 rounded-md text-sm whitespace-nowrap",
+                  "flex items-center h-10 px-4 py-2 rounded-md text-sm whitespace-nowrap", // Added h-10
                   "bg-secondary text-secondary-foreground ml-auto",
                   showOnlyFavorites ? "bg-pink-50 dark:bg-pink-900" : ""
                 )}

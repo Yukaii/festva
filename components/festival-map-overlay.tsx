@@ -46,7 +46,7 @@ type ResizeHandle = "top" | "right" | "bottom" | "left" | "topLeft" | "topRight"
 type SheetState = "collapsed" | "compact" | "expanded"
 
 export default function FestivalMapOverlay() {
-  const [sheetState, setSheetState] = useState<SheetState>("collapsed")
+  const [sheetState, setSheetState] = useState<SheetState>("compact")
   const [selectedFeature, setSelectedFeature] = useState<MapFeature | null>(null)
   const [debugMode, setDebugMode] = useState(IS_DEVELOPMENT); // Initialize based on env
   const [popoverOpen, setPopoverOpen] = useState(false)

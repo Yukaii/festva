@@ -558,9 +558,9 @@ export default function FestivalMapOverlay() {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-background text-foreground">
+    <div className="w-full mx-auto bg-background text-foreground">
       {/* Header */}
-      <div className="flex items-center px-4 py-2 border-b border-solid border-border shadow-sm mb-3 h-10">
+      <div className="flex items-center px-4 py-2 border-b border-solid border-border shadow-sm mb-3 h-10 z-40 sticky top-0 bg-background">
         <Link href="/" passHref>
           <Button variant="ghost" size="icon" aria-label="Back to Timetable" className="absolute left-0 top-0">
             <ArrowLeft className="h-4 w-4" />

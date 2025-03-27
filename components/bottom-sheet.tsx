@@ -172,7 +172,7 @@ export function BottomSheet({
 
               {/* Display current area */}
               {areaFeatures.length > 0 ? (
-                <div className="flex items-center gap-2"> {/* Reduced gap */}
+                <div className="flex items-center"> {/* Reduced gap */}
                   <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md">
                     {areaFeatures[activeIndex]?.icon}
                   </div>

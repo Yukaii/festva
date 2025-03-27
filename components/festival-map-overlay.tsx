@@ -37,12 +37,15 @@ interface MapFeature {
   color?: string
 }
 
-// Define resize handle positions
+// Define types
 type ResizeHandle = "top" | "right" | "bottom" | "left" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight" | null
+type SheetState = "collapsed" | "compact" | "expanded"
 
 export default function FestivalMapOverlay() {
+  const [sheetState, setSheetState] = useState<SheetState>("collapsed")
   const [selectedFeature, setSelectedFeature] = useState<MapFeature | null>(null)
   const [debugMode, setDebugMode] = useState(false)
+  const [popoverOpen, setPopoverOpen] = useState(false)
   const [draggingFeature, setDraggingFeature] = useState<string | null>(null)
   const [resizingFeature, setResizingFeature] = useState<string | null>(null);
   const [resizeHandle, setResizeHandle] = useState<ResizeHandle>(null);
@@ -61,6 +64,7 @@ export default function FestivalMapOverlay() {
   const [newFeatureSize, setNewFeatureSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 })
   const [showFeatureForm, setShowFeatureForm] = useState(false)
   const [editingFeature, setEditingFeature] = useState<MapFeature | null>(null)
+  const [activeIndex, setActiveIndex] = useState(0) // Add state for active index
 
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -104,11 +108,29 @@ export default function FestivalMapOverlay() {
     setSelectedFeature(feature);
   };
 
-  // Handle feature selection from bottom sheet - updates state only
+  // Handle feature selection from bottom sheet
   const handleSelectFeatureFromSheet = (feature: MapFeature) => {
+    if (sheetState === "expanded") {
+      // When selecting from expanded view, collapse to compact mode
+      setSheetState("compact");
+    }
+    if (sheetState === "compact") {
+      setPopoverOpen(true);
+    } else if (sheetState === "collapsed") {
+      // When collapsed, switch to compact mode
+      setSheetState("compact");
+    }
     handleSelectFeature(feature);
     // Scrolling is handled by the useEffect watching selectedFeature
   }
+
+  // Effect to handle sheet state changes
+  useEffect(() => {
+    // Close popover when leaving compact mode
+    if (sheetState !== "compact") {
+      setPopoverOpen(false);
+    }
+  }, [sheetState]);
 
   // Effect to scroll map when selectedFeature changes
   useEffect(() => {
@@ -169,16 +191,32 @@ export default function FestivalMapOverlay() {
   const handleFeatureClick = (feature: MapFeature, e: React.MouseEvent) => {
     if (debugMode) return;
 
-    // Toggle selection or select new feature using the state handler
-    handleSelectFeature(selectedFeature?.id === feature.id ? null : feature);
+    e.stopPropagation();
+    
+    // Find the index of the clicked feature in the areaFeatures list
+    const areaFeatures = features.filter((f) => f.width && f.height);
+    const clickedIndex = areaFeatures.findIndex(f => f.id === feature.id);
 
-    // No need to calculate tooltip position manually
-    // const rect = mapContainerRef.current?.getBoundingClientRect();
-    // if (rect) {
-    //   const x = e.clientX - rect.left;
-    //   const y = e.clientY - rect.top;
-    //   setTooltipPosition({ x, y });
-    // }
+    if (sheetState === "compact") {
+      // If clicking the same feature, toggle its state
+      if (selectedFeature?.id === feature.id) {
+        setPopoverOpen(!popoverOpen);
+      } else {
+        // If clicking a different feature, select it, show popover, and update index
+        setPopoverOpen(true);
+        handleSelectFeature(feature);
+        if (clickedIndex !== -1) {
+          setActiveIndex(clickedIndex);
+        }
+      }
+    } else {
+      // Normal behavior for other modes
+      handleSelectFeature(selectedFeature?.id === feature.id ? null : feature);
+      // Also update index if clicking a valid area feature
+      if (clickedIndex !== -1) {
+        setActiveIndex(clickedIndex);
+      }
+    }
   };
 
   // Handle mouse down for dragging in debug mode
@@ -335,10 +373,14 @@ export default function FestivalMapOverlay() {
     setFeatures((prev) => prev.filter((feature) => feature.id !== featureId))
   }
 
-  // Close context menu when clicking elsewhere
-  const handleCloseContextMenu = () => {
+  // Close context menu and popover when clicking elsewhere
+  const handleCloseContextMenu = (e: React.MouseEvent) => {
     if (contextMenu.visible) {
       setContextMenu({ ...contextMenu, visible: false })
+    }
+
+    if (sheetState === "compact" && e.target === e.currentTarget) {
+      setPopoverOpen(false);
     }
   }
 
@@ -563,12 +605,16 @@ export default function FestivalMapOverlay() {
             {features.map((feature) => (
               <Popover
                 key={feature.id}
-                open={selectedFeature?.id === feature.id && !debugMode}
+                open={(sheetState === "compact" ? (selectedFeature?.id === feature.id && popoverOpen) : selectedFeature?.id === feature.id) && !debugMode}
                 onOpenChange={(open) => {
                   if (!open) {
-                    setSelectedFeature(null);
+                    if (sheetState !== "compact") {
+                      setSelectedFeature(null);
+                    } else {
+                      setPopoverOpen(false);
+                    }
                   }
-                 }}
+                }}
                >
                  {/* Outer div for visual representation, size, position, and click handling */}
                  <div
@@ -751,6 +797,10 @@ export default function FestivalMapOverlay() {
           features={features}
           onSelectFeature={handleSelectFeatureFromSheet}
           selectedFeature={selectedFeature}
+          sheetState={sheetState}
+          onSheetStateChange={setSheetState}
+          activeIndex={activeIndex} // Pass activeIndex
+          onActiveIndexChange={setActiveIndex} // Pass handler
         />
       )}
 

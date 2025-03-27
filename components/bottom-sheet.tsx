@@ -5,23 +5,65 @@ import { ChevronLeft, ChevronRight, X, Minus } from "lucide-react" // Added Minu
 import { motion } from "framer-motion"
 import { useMobile } from "@/hooks/use-mobile"
 
+type SheetState = "collapsed" | "compact" | "expanded"
+
 interface BottomSheetProps {
   features: any[]
   onSelectFeature: (feature: any) => void
   selectedFeature: any | null
+  sheetState?: SheetState
+  onSheetStateChange?: (state: SheetState) => void
+  activeIndex?: number // Add activeIndex prop
+  onActiveIndexChange?: (index: number) => void // Add callback for index change
 }
 
-type SheetState = "collapsed" | "compact" | "expanded"
+export function BottomSheet({ 
+  features, 
+  onSelectFeature, 
+  selectedFeature,
+  sheetState: externalSheetState,
+  onSheetStateChange,
+  activeIndex: externalActiveIndex, // Receive external index
+  onActiveIndexChange // Receive callback
+}: BottomSheetProps) {
+  const [internalSheetState, setInternalSheetState] = useState<SheetState>("collapsed")
+  const sheetState = externalSheetState ?? internalSheetState // Use ?? for default
 
-export function BottomSheet({ features, onSelectFeature, selectedFeature }: BottomSheetProps) {
-  const [sheetState, setSheetState] = useState<SheetState>("collapsed")
+  const [internalActiveIndex, setInternalActiveIndex] = useState(0)
+  const activeIndex = externalActiveIndex ?? internalActiveIndex // Use external index if provided
+
+  // Function to set active index, calling callback if provided
+  const setActiveIndex = (index: number | ((prevIndex: number) => number)) => {
+    const newIndex = typeof index === 'function' ? index(activeIndex) : index;
+    if (onActiveIndexChange) {
+      onActiveIndexChange(newIndex);
+    } else {
+      setInternalActiveIndex(newIndex);
+    }
+  }
+
+  const setSheetState = (state: SheetState | ((current: SheetState) => SheetState)) => {
+    const newState = typeof state === 'function' ? state(sheetState) : state;
+    if (onSheetStateChange) {
+      onSheetStateChange(newState)
+    } else {
+      setInternalSheetState(newState)
+    }
+  }
+
+  // Initialize internal state when external state is provided
+  useEffect(() => {
+    if (externalSheetState) {
+      setInternalSheetState(externalSheetState);
+    }
+  }, [externalSheetState]);
+
   const [lastNonCollapsedState, setLastNonCollapsedState] = useState<"compact" | "expanded">("compact") // Remember last state
-  const [activeIndex, setActiveIndex] = useState(0)
+  // Removed internal activeIndex state declaration, handled above
   const isMobile = useMobile()
 
   // Filter features
-  const areaFeatures = features.filter((feature) => feature.width && feature.height) // Used in expanded view
-  const stageFeatures = features.filter((feature) => feature.isStage) // Used in compact view
+  const areaFeatures = features.filter((feature) => feature.width && feature.height) // Used in expanded and compact view
 
   // Get the height based on the current state
   const getHeight = () => {
@@ -69,31 +111,31 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
     }
   }
 
-  // Handle navigation in compact mode (using stageFeatures)
+  // Handle navigation in compact mode (using areaFeatures)
   const handlePrevious = () => {
-    if (sheetState !== "compact" || stageFeatures.length <= 1) return
-    setActiveIndex((prev) => (prev - 1 + stageFeatures.length) % stageFeatures.length)
+    if (sheetState !== "compact" || areaFeatures.length <= 1) return
+    setActiveIndex((prev) => (prev - 1 + areaFeatures.length) % areaFeatures.length)
   }
 
   const handleNext = () => {
-    if (sheetState !== "compact" || stageFeatures.length <= 1) return
-    setActiveIndex((prev) => (prev + 1) % stageFeatures.length)
+    if (sheetState !== "compact" || areaFeatures.length <= 1) return
+    setActiveIndex((prev) => (prev + 1) % areaFeatures.length)
   }
 
-  // Update selected feature when active index changes in compact mode (using stageFeatures)
+  // Update selected feature when active index changes in compact mode (using areaFeatures)
   useEffect(() => {
-    if (sheetState === "compact" && stageFeatures.length > 0) {
+    if (sheetState === "compact" && areaFeatures.length > 0) {
       // Only select the feature if it's different from the currently selected one
-      const feature = stageFeatures[activeIndex]
+      const feature = areaFeatures[activeIndex]
       if (!selectedFeature || feature.id !== selectedFeature.id) {
-        onSelectFeature(feature) // Select the stage feature
+        onSelectFeature(feature) // Select the area feature
       }
     }
-    // Reset index if switching to compact and index is out of bounds for stages
-    else if (sheetState === "compact" && activeIndex >= stageFeatures.length) {
+    // Reset index if switching to compact and index is out of bounds for areas
+    else if (sheetState === "compact" && activeIndex >= areaFeatures.length) {
       setActiveIndex(0);
     }
-  }, [activeIndex, sheetState, stageFeatures, selectedFeature, onSelectFeature]) // Added onSelectFeature dependency
+  }, [activeIndex, sheetState, areaFeatures, selectedFeature, onSelectFeature]) // Updated dependency to areaFeatures
 
   // Render the appropriate content based on the current state
   const renderContent = () => {
@@ -128,16 +170,16 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
                 <ChevronLeft className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               </button>
 
-              {/* Display current stage */}
-              {stageFeatures.length > 0 ? (
+              {/* Display current area */}
+              {areaFeatures.length > 0 ? (
                 <div className="flex items-center gap-2"> {/* Reduced gap */}
                   <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md">
-                    {stageFeatures[activeIndex]?.icon}
+                    {areaFeatures[activeIndex]?.icon}
                   </div>
-                  <div className="font-medium text-gray-900 dark:text-gray-100">{stageFeatures[activeIndex]?.name}</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">{areaFeatures[activeIndex]?.name}</div>
                 </div>
               ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400">No stages available</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">No areas available</div>
               )}
 
               <button onClick={handleNext} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 z-10">
@@ -145,10 +187,10 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
               </button>
             </div>
 
-            {/* Pagination dots for stages */}
+            {/* Pagination dots for areas */}
             <div className="flex justify-center pb-1"> {/* Reduced bottom padding */}
               <div className="flex gap-1">
-                {stageFeatures.map((_, index) => (
+                {areaFeatures.map((_, index) => (
                   <div
                     key={`dot-${index}`} // Use a more specific key
                     className={`w-2 h-2 rounded-full ${index === activeIndex ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"}`}

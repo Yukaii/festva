@@ -229,6 +229,25 @@ function ImprovedGridView({
   showOnlyFavorites,
 }: ImprovedGridViewProps) {
   const { stages } = useStages()
+  const DEBUG_MODE = process.env.NODE_ENV === 'development'; // Enable debug mode in development
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    if (DEBUG_MODE) {
+      // Set a fixed time around 12 PM for debugging
+      const debugDate = new Date(selectedDate);
+      debugDate.setHours(12, 0, 0, 0);
+      setCurrentTime(debugDate);
+      // No interval needed in debug mode
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer); // Cleanup interval on component unmount
+  }, [DEBUG_MODE, selectedDate]); // Add selectedDate dependency for debug mode
 
   const stagesToDisplay = useMemo(() => {
     if (!showOnlyFavorites) {
@@ -238,10 +257,38 @@ function ImprovedGridView({
     return stages.filter((stage) => stageIds.has(stage.id))
   }, [stages, performances, favorites, showOnlyFavorites])
 
-  const firstSlotTime = timeSlots[0].timestamp
-  const lastSlotTime = timeSlots[timeSlots.length - 1].timestamp
-  const totalTimeRange = lastSlotTime - firstSlotTime
+  const firstSlotTime = timeSlots.length > 0 ? timeSlots[0].timestamp : 0;
+  const lastSlotTime = timeSlots.length > 0 ? timeSlots[timeSlots.length - 1].timestamp : 0;
+  const totalTimeRange = lastSlotTime - firstSlotTime;
   const rowHeight = 30 // Match the h-[30px] used for time slots
+  const totalHeight = timeSlots.length * rowHeight;
+
+  const isToday = useMemo(() => {
+    const today = new Date();
+    const selected = new Date(selectedDate);
+    return today.toDateString() === selected.toDateString();
+  }, [selectedDate]);
+
+  const nowIndicatorTop = useMemo(() => {
+    // In debug mode, always calculate position if within range, ignore isToday
+    if (DEBUG_MODE) {
+      if (totalTimeRange <= 0 || !firstSlotTime) return null;
+      const currentTimestamp = currentTime.getTime();
+      // Check if debug time is within the timetable range
+      if (currentTimestamp < firstSlotTime || currentTimestamp > lastSlotTime + (10 * 60000)) {
+        return null;
+      }
+      return ((currentTimestamp - firstSlotTime) / totalTimeRange) * totalHeight;
+    }
+
+    // Original logic for non-debug mode
+    if (!isToday || totalTimeRange <= 0 || !firstSlotTime) return null;
+    const currentTimestamp = currentTime.getTime();
+    if (currentTimestamp < firstSlotTime || currentTimestamp > lastSlotTime + (10 * 60000)) { // Allow slightly past last slot
+      return null;
+    }
+    return ((currentTimestamp - firstSlotTime) / totalTimeRange) * totalHeight;
+  }, [currentTime, firstSlotTime, lastSlotTime, totalTimeRange, totalHeight, isToday, DEBUG_MODE]); // Add DEBUG_MODE dependency
 
   return (
     // Apply mobile styles directly
@@ -259,9 +306,21 @@ function ImprovedGridView({
         ))}
       </div>
 
+      {/* Time Column */}
       <div className="flex flex-col sticky left-0 z-10 bg-background border-r border-border">
+        {/* Current Time Label Indicator */}
+        {nowIndicatorTop !== null && (
+          <div
+            className="absolute left-0 w-full z-20 flex items-center justify-center"
+            style={{ top: `${nowIndicatorTop}px`, transform: 'translateY(-50%)' }} // Center vertically
+          >
+            <span className="bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded leading-none">
+              {currentTime.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}
+            </span>
+          </div>
+        )}
         {timeSlots.map((slot) => {
-          const date = new Date(slot.timestamp)
+          const date = new Date(slot.timestamp);
           const isHourMark = date.getMinutes() === 0
           const isHalfHourMark = date.getMinutes() === 30
           const showLabel = isHourMark || isHalfHourMark
@@ -281,12 +340,20 @@ function ImprovedGridView({
         })}
       </div>
 
+      {/* Grid Area */}
       <div
         className="grid grid-flow-col relative"
         style={{
           gridTemplateColumns: `repeat(${stagesToDisplay.length}, minmax(120px, 1fr))`,
         }}
       >
+        {/* Current Time Horizontal Line */}
+        {nowIndicatorTop !== null && (
+          <div
+            className="absolute top-0 left-0 w-full h-0.5 bg-red-500 z-20"
+            style={{ top: `${nowIndicatorTop}px` }}
+          />
+        )}
         {stagesToDisplay.map((stage) => (
           <div key={stage.id} className="relative border-l border-border min-h-full">
             {timeSlots.map((slot) => {

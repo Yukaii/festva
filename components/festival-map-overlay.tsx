@@ -24,6 +24,9 @@ import { useMobile } from "@/hooks/use-mobile";
 import { JSX } from "react/jsx-runtime";
 import { mapFeatures } from "@/data/mapFeatures";
 
+// Constant to control debug features based on environment
+const IS_DEVELOPMENT = false // process.env.NODE_ENV === 'development';
+
 // Define the types for our map features
 interface MapFeature {
   id: string
@@ -44,7 +47,7 @@ type SheetState = "collapsed" | "compact" | "expanded"
 export default function FestivalMapOverlay() {
   const [sheetState, setSheetState] = useState<SheetState>("collapsed")
   const [selectedFeature, setSelectedFeature] = useState<MapFeature | null>(null)
-  const [debugMode, setDebugMode] = useState(false)
+  const [debugMode, setDebugMode] = useState(IS_DEVELOPMENT); // Initialize based on env
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [draggingFeature, setDraggingFeature] = useState<string | null>(null)
   const [resizingFeature, setResizingFeature] = useState<string | null>(null);
@@ -189,10 +192,11 @@ export default function FestivalMapOverlay() {
 
   // Handle feature click on the map
   const handleFeatureClick = (feature: MapFeature, e: React.MouseEvent) => {
-    if (debugMode) return;
+    // Allow clicking features even if debug mode UI is hidden, but respect debugMode state for interactions
+    // if (debugMode) return; // Keep interaction logic tied to debugMode state
 
     e.stopPropagation();
-    
+
     // Find the index of the clicked feature in the areaFeatures list
     const areaFeatures = features.filter((f) => f.width && f.height);
     const clickedIndex = areaFeatures.findIndex(f => f.id === feature.id);
@@ -221,7 +225,7 @@ export default function FestivalMapOverlay() {
 
   // Handle mouse down for dragging in debug mode
   const handleMouseDown = (featureId: string, e: React.MouseEvent) => {
-    if (!debugMode) return
+    if (!debugMode) return // Logic still depends on debugMode state
 
     e.preventDefault()
     e.stopPropagation()
@@ -230,7 +234,7 @@ export default function FestivalMapOverlay() {
 
   // Handle mouse down on resize handle
   const handleResizeStart = (featureId: string, handle: ResizeHandle, e: React.MouseEvent) => {
-    if (!debugMode) return
+    if (!debugMode) return // Logic still depends on debugMode state
 
     e.preventDefault()
     e.stopPropagation()
@@ -238,8 +242,10 @@ export default function FestivalMapOverlay() {
     setResizeHandle(handle)
   }
 
-  // Handle right click for context menu
+  // Handle right click for context menu (only enable in development)
   const handleContextMenu = (e: React.MouseEvent) => {
+    if (!IS_DEVELOPMENT) return; // Disable context menu in production
+
     e.preventDefault()
 
     const container = mapContainerRef.current
@@ -553,18 +559,21 @@ export default function FestivalMapOverlay() {
   return (
     <div className="w-full max-w-6xl mx-auto bg-background text-foreground">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">MEGAPORT FEST. 2025</h1>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Switch id="debug-mode" checked={debugMode} onCheckedChange={setDebugMode} />
-            <Label htmlFor="debug-mode" className="dark:text-gray-300">Debug Mode</Label>
+        <h1 className="text-3xl font-bold">地圖導覽</h1>
+        {/* Debug Controls - Only show in development */}
+        {IS_DEVELOPMENT && (
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Switch id="debug-mode" checked={debugMode} onCheckedChange={setDebugMode} />
+              <Label htmlFor="debug-mode" className="dark:text-gray-300">Debug Mode</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="fixed-scale" checked={fixedScale} onCheckedChange={toggleFixedScale} />
+              <Label htmlFor="fixed-scale" className="dark:text-gray-300">Fixed Scale</Label>
+            </div>
+            {debugMode && <Button onClick={exportPositions}>Export Positions</Button>}
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch id="fixed-scale" checked={fixedScale} onCheckedChange={toggleFixedScale} />
-            <Label htmlFor="fixed-scale" className="dark:text-gray-300">Fixed Scale</Label>
-          </div>
-          {debugMode && <Button onClick={exportPositions}>Export Positions</Button>}
-        </div>
+        )}
       </div>
 
       <div
@@ -619,6 +628,7 @@ export default function FestivalMapOverlay() {
                  {/* Outer div for visual representation, size, position, and click handling */}
                  <div
                    id={`feature-${feature.id}`} // Add unique ID for targeting
+                   // Apply debug styles conditionally based on debugMode state
                    className={`absolute ${debugMode ? "border-2 border-red-500 cursor-move" : "cursor-pointer hover:bg-opacity-50"}`}
                    style={{
                      left: `${feature.x * scale}px`,
@@ -631,11 +641,12 @@ export default function FestivalMapOverlay() {
                       zIndex: draggingFeature === feature.id || resizingFeature === feature.id ? 100 : 10,
                     }}
                     onClick={(e) => handleFeatureClick(feature, e)}
-                    onMouseDown={(e) => handleMouseDown(feature.id, e)}
-                    onDoubleClick={(e) => {
+                    // Only attach drag/double-click handlers if IS_DEVELOPMENT
+                    onMouseDown={IS_DEVELOPMENT ? (e) => handleMouseDown(feature.id, e) : undefined}
+                    onDoubleClick={IS_DEVELOPMENT ? (e) => {
                       e.stopPropagation();
                       handleEditFeature(feature.id);
-                    }}
+                    } : undefined}
                   >
                     {/* Inner, centered, invisible div to act as the PopoverTrigger anchor */}
                     <PopoverTrigger asChild>
@@ -658,19 +669,19 @@ export default function FestivalMapOverlay() {
                       </div>
                     )}
 
+                    {/* Debug info and handles - Only show if debugMode state is true */}
                     {debugMode && (
-                      <div className="absolute -top-6 left-0 bg-black text-white text-xs px-1 whitespace-nowrap">
-                        {feature.id}
-                      </div>
+                      <>
+                        <div className="absolute -top-6 left-0 bg-black text-white text-xs px-1 whitespace-nowrap">
+                          {feature.id}
+                        </div>
+                        <div className="absolute top-0 left-0 right-0 flex justify-center">
+                          <Move className="h-4 w-4 text-red-500" />
+                        </div>
+                      </>
                     )}
 
-                    {debugMode && (
-                      <div className="absolute top-0 left-0 right-0 flex justify-center">
-                        <Move className="h-4 w-4 text-red-500" />
-                      </div>
-                    )}
-
-                    {/* Resize handles for areas in debug mode */}
+                    {/* Resize handles for areas - Only show if debugMode state is true */}
                     {debugMode && feature.width && feature.height && (
                       <>
                         {/* Top handle */}
@@ -742,9 +753,10 @@ export default function FestivalMapOverlay() {
 
           {/* Information tooltip - REMOVED, handled by Popover */}
 
-          {/* Context Menu */}
-          <ContextMenu
-            x={contextMenu.x}
+          {/* Context Menu - Only show if visible and in development */}
+          {IS_DEVELOPMENT && contextMenu.visible && (
+            <ContextMenu
+              x={contextMenu.x}
             y={contextMenu.y}
             visible={contextMenu.visible}
             onClose={() => setContextMenu({ ...contextMenu, visible: false })}
@@ -765,10 +777,11 @@ export default function FestivalMapOverlay() {
                 contextMenu.y <= featureY + (f.height ? featureHeight : 15)
               )
             })}
-          />
+            />
+          )}
 
-          {/* Feature creation overlay */}
-          {isCreatingFeature && newFeatureStartPos && (
+          {/* Feature creation overlay - Only show if creating and in development */}
+          {IS_DEVELOPMENT && isCreatingFeature && newFeatureStartPos && (
             <FeatureCreationGuide
               startX={newFeatureStartPos.x * scale}
               startY={newFeatureStartPos.y * scale}
@@ -779,9 +792,9 @@ export default function FestivalMapOverlay() {
         </div>
       </div>
 
-      {/* Feature form dialog */}
+      {/* Feature form dialog - Only allow opening if in development */}
       <FeatureForm
-        open={showFeatureForm}
+        open={IS_DEVELOPMENT && showFeatureForm}
         onClose={() => {
           setShowFeatureForm(false)
           setEditingFeature(null)
@@ -791,10 +804,9 @@ export default function FestivalMapOverlay() {
         isEdit={!!editingFeature}
       />
 
-      {/* Mobile Bottom Sheet Navigation */}
-      {!debugMode && (
-        <BottomSheet
-          features={features}
+      {/* Mobile Bottom Sheet Navigation - Always show, independent of debug mode */}
+      <BottomSheet
+        features={features}
           onSelectFeature={handleSelectFeatureFromSheet}
           selectedFeature={selectedFeature}
           sheetState={sheetState}
@@ -802,9 +814,7 @@ export default function FestivalMapOverlay() {
           activeIndex={activeIndex} // Pass activeIndex
           onActiveIndexChange={setActiveIndex} // Pass handler
         />
-      )}
-
-      {/* Debug console */}
+      {/* Debug console - Only show if debugMode state is true */}
       {debugMode && (
         <Card className="mt-4 p-4 bg-gray-100 dark:bg-gray-900 dark:border-gray-700">
           <h2 className="text-lg font-bold mb-2 dark:text-white">Debug Console</h2>

@@ -19,8 +19,9 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
   const [activeIndex, setActiveIndex] = useState(0)
   const isMobile = useMobile()
 
-  // Filter only area features (stages and zones)
-  const areaFeatures = features.filter((feature) => feature.width && feature.height)
+  // Filter features
+  const areaFeatures = features.filter((feature) => feature.width && feature.height) // Used in expanded view
+  const stageFeatures = features.filter((feature) => feature.isStage) // Used in compact view
 
   // Get the height based on the current state
   const getHeight = () => {
@@ -68,27 +69,31 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
     }
   }
 
-  // Handle navigation in compact mode
+  // Handle navigation in compact mode (using stageFeatures)
   const handlePrevious = () => {
-    if (sheetState !== "compact" || areaFeatures.length <= 1) return
-    setActiveIndex((prev) => (prev - 1 + areaFeatures.length) % areaFeatures.length)
+    if (sheetState !== "compact" || stageFeatures.length <= 1) return
+    setActiveIndex((prev) => (prev - 1 + stageFeatures.length) % stageFeatures.length)
   }
 
   const handleNext = () => {
-    if (sheetState !== "compact" || areaFeatures.length <= 1) return
-    setActiveIndex((prev) => (prev + 1) % areaFeatures.length)
+    if (sheetState !== "compact" || stageFeatures.length <= 1) return
+    setActiveIndex((prev) => (prev + 1) % stageFeatures.length)
   }
 
-  // Update selected feature when active index changes in compact mode
+  // Update selected feature when active index changes in compact mode (using stageFeatures)
   useEffect(() => {
-    if (sheetState === "compact" && areaFeatures.length > 0) {
+    if (sheetState === "compact" && stageFeatures.length > 0) {
       // Only select the feature if it's different from the currently selected one
-      const feature = areaFeatures[activeIndex]
+      const feature = stageFeatures[activeIndex]
       if (!selectedFeature || feature.id !== selectedFeature.id) {
-        onSelectFeature(feature)
+        onSelectFeature(feature) // Select the stage feature
       }
     }
-  }, [activeIndex, sheetState, areaFeatures, selectedFeature])
+    // Reset index if switching to compact and index is out of bounds for stages
+    else if (sheetState === "compact" && activeIndex >= stageFeatures.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, sheetState, stageFeatures, selectedFeature, onSelectFeature]) // Added onSelectFeature dependency
 
   // Render the appropriate content based on the current state
   const renderContent = () => {
@@ -123,23 +128,29 @@ export function BottomSheet({ features, onSelectFeature, selectedFeature }: Bott
                 <ChevronLeft className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               </button>
 
-              <div className="flex items-center gap-2"> {/* Reduced gap */}
-                <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md">
-                  {areaFeatures[activeIndex]?.icon}
+              {/* Display current stage */}
+              {stageFeatures.length > 0 ? (
+                <div className="flex items-center gap-2"> {/* Reduced gap */}
+                  <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-md">
+                    {stageFeatures[activeIndex]?.icon}
+                  </div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">{stageFeatures[activeIndex]?.name}</div>
                 </div>
-                <div className="font-medium text-gray-900 dark:text-gray-100">{areaFeatures[activeIndex]?.name}</div>
-              </div>
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400">No stages available</div>
+              )}
 
               <button onClick={handleNext} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 z-10">
                 <ChevronRight className="h-5 w-5 text-gray-800 dark:text-gray-200" />
               </button>
             </div>
 
+            {/* Pagination dots for stages */}
             <div className="flex justify-center pb-1"> {/* Reduced bottom padding */}
               <div className="flex gap-1">
-                {areaFeatures.map((_, index) => (
+                {stageFeatures.map((_, index) => (
                   <div
-                    key={index}
+                    key={`dot-${index}`} // Use a more specific key
                     className={`w-2 h-2 rounded-full ${index === activeIndex ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"}`}
                   />
                 ))}

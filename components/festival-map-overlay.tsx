@@ -3,10 +3,11 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import Link from "next/link" // Add Link import
 import Image from "next/image"
-import { Info, X, Move, MapPin } from "lucide-react"
+import { Info, X, Move, MapPin, ArrowLeft } from "lucide-react" // Add ArrowLeft import
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import {
@@ -558,27 +559,35 @@ export default function FestivalMapOverlay() {
 
   return (
     <div className="w-full max-w-6xl mx-auto bg-background text-foreground">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">地圖導覽</h1>
-        {/* Debug Controls - Only show in development */}
-        {IS_DEVELOPMENT && (
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Switch id="debug-mode" checked={debugMode} onCheckedChange={setDebugMode} />
-              <Label htmlFor="debug-mode" className="dark:text-gray-300">Debug Mode</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch id="fixed-scale" checked={fixedScale} onCheckedChange={toggleFixedScale} />
-              <Label htmlFor="fixed-scale" className="dark:text-gray-300">Fixed Scale</Label>
-            </div>
-            {debugMode && <Button onClick={exportPositions}>Export Positions</Button>}
-          </div>
-        )}
+      {/* Header */}
+      <div className="flex items-center px-4 py-2 border-b border-solid border-border shadow-sm mb-3 h-10">
+        <Link href="/" passHref>
+          <Button variant="ghost" size="icon" aria-label="Back to Timetable" className="absolute left-0 top-0">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+
+        <h1 className="text-lg font-bold flex-1 text-center">大港開唱 2025</h1>
       </div>
+
+      {/* Debug Controls - Only show in development */}
+      {IS_DEVELOPMENT && (
+        <div className="flex items-center space-x-4 p-4">
+          <div className="flex items-center space-x-2">
+            <Switch id="debug-mode" checked={debugMode} onCheckedChange={setDebugMode} />
+            <Label htmlFor="debug-mode" className="dark:text-gray-300">Debug Mode</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch id="fixed-scale" checked={fixedScale} onCheckedChange={toggleFixedScale} />
+            <Label htmlFor="fixed-scale" className="dark:text-gray-300">Fixed Scale</Label>
+          </div>
+          {debugMode && <Button onClick={exportPositions}>Export Positions</Button>}
+        </div>
+      )}
 
       <div
         ref={mapContainerRef}
-        className="relative overflow-auto rounded-lg shadow-lg dark:border dark:border-gray-700"
+        className="relative overflow-auto rounded-lg shadow-lg dark:border dark:border-gray-700 mx-5"
         style={{
           height: "calc(100vh - 180px)",
           overscrollBehaviorX: 'contain' // Prevent horizontal swipe navigation

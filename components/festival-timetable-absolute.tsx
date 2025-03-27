@@ -258,10 +258,15 @@ function ImprovedGridView({
   }, [stages, performances, favorites, showOnlyFavorites])
 
   const firstSlotTime = timeSlots.length > 0 ? timeSlots[0].timestamp : 0;
-  const lastSlotTime = timeSlots.length > 0 ? timeSlots[timeSlots.length - 1].timestamp : 0;
-  const totalTimeRange = lastSlotTime - firstSlotTime;
+  // const lastSlotTime = timeSlots.length > 0 ? timeSlots[timeSlots.length - 1].timestamp : 0; // Not needed for adjusted calculation
+  const intervalMinutes = 10; // The interval used in generateTimeSlots
+  const intervalMilliseconds = intervalMinutes * 60000;
   const rowHeight = 30 // Match the h-[30px] used for time slots
   const totalHeight = timeSlots.length * rowHeight;
+  // Adjusted total time range to match the total height duration
+  const adjustedTotalTimeRange = timeSlots.length > 0 ? timeSlots.length * intervalMilliseconds : 0;
+  // Adjust the reference start time back by one interval to align calculations with grid lines
+  const adjustedFirstSlotTime = firstSlotTime - intervalMilliseconds;
 
   const isToday = useMemo(() => {
     const today = new Date();
@@ -270,25 +275,36 @@ function ImprovedGridView({
   }, [selectedDate]);
 
   const nowIndicatorTop = useMemo(() => {
-    // In debug mode, always calculate position if within range, ignore isToday
-    if (DEBUG_MODE) {
-      if (totalTimeRange <= 0 || !firstSlotTime) return null;
-      const currentTimestamp = currentTime.getTime();
-      // Check if debug time is within the timetable range
-      if (currentTimestamp < firstSlotTime || currentTimestamp > lastSlotTime + (10 * 60000)) {
-        return null;
-      }
-      return ((currentTimestamp - firstSlotTime) / totalTimeRange) * totalHeight;
-    }
+    // Use adjustedFirstSlotTime for range checks and calculations
+    if (adjustedTotalTimeRange <= 0 || !firstSlotTime) return null; // Keep original firstSlotTime check for validity
 
-    // Original logic for non-debug mode
-    if (!isToday || totalTimeRange <= 0 || !firstSlotTime) return null;
     const currentTimestamp = currentTime.getTime();
-    if (currentTimestamp < firstSlotTime || currentTimestamp > lastSlotTime + (10 * 60000)) { // Allow slightly past last slot
+    // Effective end time relative to the original firstSlotTime
+    const effectiveEndTime = firstSlotTime + adjustedTotalTimeRange;
+
+    // Check if current time is within the visual range [firstSlotTime, effectiveEndTime)
+    if (currentTimestamp < firstSlotTime || currentTimestamp >= effectiveEndTime) {
+       // Also check debug mode specifically, as its fixed time might be outside the range
+       if (DEBUG_MODE && (currentTimestamp < firstSlotTime || currentTimestamp >= effectiveEndTime)) {
+         console.warn("Debug time is outside the timetable range.");
+       }
       return null;
     }
-    return ((currentTimestamp - firstSlotTime) / totalTimeRange) * totalHeight;
-  }, [currentTime, firstSlotTime, lastSlotTime, totalTimeRange, totalHeight, isToday, DEBUG_MODE]); // Add DEBUG_MODE dependency
+
+    // Calculate position using the adjusted start time and original range
+    const position = ((currentTimestamp - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight;
+
+    // In debug mode, always return the calculated position if within range
+    if (DEBUG_MODE) {
+      return position;
+    }
+
+    // Original logic: only return position if it's today
+    if (!isToday) return null;
+
+    return position;
+
+  }, [currentTime, firstSlotTime, adjustedFirstSlotTime, adjustedTotalTimeRange, totalHeight, isToday, DEBUG_MODE]); // Add adjustedFirstSlotTime dependency
 
   return (
     // Apply mobile styles directly
@@ -377,8 +393,9 @@ function ImprovedGridView({
               .map((performance) => {
                 const startTime = performance.startTimestamp || 0
                 const endTime = performance.endTimestamp || 0
-                const startPosition = ((startTime - firstSlotTime) / totalTimeRange) * (timeSlots.length * rowHeight)
-                const endPosition = ((endTime - firstSlotTime) / totalTimeRange) * (timeSlots.length * rowHeight)
+                // Use adjustedFirstSlotTime for performance positioning
+                const startPosition = adjustedTotalTimeRange > 0 ? ((startTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight : 0;
+                const endPosition = adjustedTotalTimeRange > 0 ? ((endTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight : 0;
                 const height = endPosition - startPosition
                 const isFavorite = favorites.includes(performance.id)
                 return (

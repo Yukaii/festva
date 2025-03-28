@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react"; // Added useRef, useCallback
 import Link from "next/link"; // Import Link
 import { usePathname } from "next/navigation"; // Import usePathname
 import { useStages } from "./stage-provider";
@@ -8,6 +8,7 @@ import { DateSelector } from "./date-selector";
 import type { Performance, TimeSlotInfo, FestivalDay } from "@/types/festival";
 import { Heart, Grid, Moon, Sun, Info, Share2, Map, ArrowLeft } from "lucide-react"; // Added Map, ArrowLeft
 import { cn } from "@/lib/utils";
+import { useGesture } from "@use-gesture/react"; // Added useGesture
 import { MobileFavoritesView } from "./mobile-favorites-view";
 import { useTheme } from "next-themes";
 import {
@@ -261,9 +262,12 @@ function ImprovedGridView({
   selectedDate,
   showOnlyFavorites,
 }: ImprovedGridViewProps) {
-  const { stages } = useStages()
+  const { stages } = useStages();
   const DEBUG_MODE = process.env.NODE_ENV === 'development'; // Enable debug mode in development
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [scale, setScale] = useState(1); // State for zoom scale
+  const [minScale, setMinScale] = useState(0.5); // State for dynamic min scale, default 0.5
+  const gridRef = useRef<HTMLDivElement>(null); // Ref for the grid container
 
   useEffect(() => {
     if (DEBUG_MODE) {
@@ -288,14 +292,36 @@ function ImprovedGridView({
     }
     const stageIds = new Set(performances.filter((p) => favorites.includes(p.id)).map((p) => p.stageId))
     return stages.filter((stage) => stageIds.has(stage.id))
-  }, [stages, performances, favorites, showOnlyFavorites])
+  }, [stages, performances, favorites, showOnlyFavorites]);
+
+  // Calculate min scale based on container width and number of stages
+  useEffect(() => {
+    if (gridRef.current && stagesToDisplay.length > 0) {
+      const containerWidth = gridRef.current.clientWidth;
+      // Subtract time column width (50px) from container width for accurate stage area width
+      const availableStageWidth = containerWidth - 50;
+      const totalBaseStageWidth = stagesToDisplay.length * 120; // 120px is the base min width
+
+      if (totalBaseStageWidth > availableStageWidth) {
+        const calculatedMinScale = availableStageWidth / totalBaseStageWidth;
+        // Set a floor for minScale, e.g., 0.1, to prevent extreme zoom-out
+        setMinScale(Math.max(0.1, calculatedMinScale));
+      } else {
+        // If content already fits, min scale can be 1 (or slightly less if desired)
+        setMinScale(1);
+      }
+    }
+    // Recalculate when stages change (e.g., filtering)
+  }, [stagesToDisplay, gridRef]);
+
 
   const firstSlotTime = timeSlots.length > 0 ? timeSlots[0].timestamp : 0;
   // const lastSlotTime = timeSlots.length > 0 ? timeSlots[timeSlots.length - 1].timestamp : 0; // Not needed for adjusted calculation
   const intervalMinutes = 10; // The interval used in generateTimeSlots
   const intervalMilliseconds = intervalMinutes * 60000;
-  const rowHeight = 30 // Match the h-[30px] used for time slots
-  const totalHeight = timeSlots.length * rowHeight;
+  const baseRowHeight = 30; // Base height for calculations
+  const rowHeight = baseRowHeight * scale; // Scaled row height
+  const totalHeight = timeSlots.length * baseRowHeight; // Total height based on base row height for consistent calculation
   // Adjusted total time range to match the total height duration
   const adjustedTotalTimeRange = timeSlots.length > 0 ? timeSlots.length * intervalMilliseconds : 0;
   // Adjust the reference start time back by one interval to align calculations with grid lines
@@ -324,8 +350,8 @@ function ImprovedGridView({
       return null;
     }
 
-    // Calculate position using the adjusted start time and original range
-    const position = ((currentTimestamp - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight;
+    // Calculate position using the adjusted start time and original range, then scale
+    const position = (((currentTimestamp - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight) * scale;
 
     // In debug mode, always return the calculated position if within range
     if (DEBUG_MODE) {
@@ -337,17 +363,44 @@ function ImprovedGridView({
 
     return position;
 
-  }, [currentTime, firstSlotTime, adjustedFirstSlotTime, adjustedTotalTimeRange, totalHeight, isToday, DEBUG_MODE]); // Add adjustedFirstSlotTime dependency
+  }, [currentTime, firstSlotTime, adjustedFirstSlotTime, adjustedTotalTimeRange, totalHeight, isToday, DEBUG_MODE, scale]); // Add scale dependency
+
+
+  // Gesture handler using dynamic minScale and max=1
+  useGesture(
+    {
+      onPinch: ({ offset: [s] }) => {
+        // Clamp scale between dynamic minScale and 1 (max)
+        setScale(Math.max(minScale, Math.min(s, 1)));
+      },
+    },
+    {
+      target: gridRef,
+      eventOptions: { passive: false }, // Allow preventing default scroll on touch devices
+      pinch: {
+        scaleBounds: () => ({ min: minScale, max: 1 }), // Use function to get latest minScale
+        rubberband: true
+      }
+    }
+  );
 
   return (
     // Apply mobile styles directly
-    <div className={cn(
-      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar",
+    // Added ref and touch-action: none to prevent conflicts with browser pinch zoom
+    <div ref={gridRef} className={cn(
+      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar touch-none", // Added touch-none
       "grid-cols-[50px_1fr]" // Use mobile grid columns directly
     )}>
+      {/* Top-left corner */}
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 
-      <div className="grid auto-cols-[minmax(120px,1fr)] grid-flow-col sticky top-0 z-20 bg-background">
+      {/* Stage Headers */}
+      {/* Stage Headers - Reverted to 45vw max */}
+      <div
+        className="grid grid-flow-col sticky top-0 z-20 bg-background"
+        // Apply scale to column width calculation, add max width constraint
+        style={{ gridTemplateColumns: `repeat(${stagesToDisplay.length}, minmax(${120 * scale}px, 45vw))` }}
+      >
         {stagesToDisplay.map((stage) => (
           <div key={stage.id} className={cn("p-2 font-bold text-center border-l border-b border-border", stage.color)}>
             {stage.name}
@@ -361,6 +414,7 @@ function ImprovedGridView({
         {nowIndicatorTop !== null && (
           <div
             className="absolute left-0 w-full z-20 flex items-center justify-center"
+            // Apply scale to top position
             style={{ top: `${nowIndicatorTop}px`, transform: 'translateY(-50%)' }} // Center vertically
           >
             <span className="bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded leading-none">
@@ -368,69 +422,83 @@ function ImprovedGridView({
             </span>
           </div>
         )}
+        {/* Time Slots */}
         {timeSlots.map((slot) => {
           const date = new Date(slot.timestamp);
-          const isHourMark = date.getMinutes() === 0
-          const isHalfHourMark = date.getMinutes() === 30
-          const showLabel = isHourMark || isHalfHourMark
+          const isHourMark = date.getMinutes() === 0;
+          const isHalfHourMark = date.getMinutes() === 30;
+          const showLabel = isHourMark || isHalfHourMark;
           return (
             <div
               key={`time-${slot.timestamp}`}
               className={cn(
-                "h-[30px] flex items-center justify-center border-b border-border",
+                "flex items-center justify-center border-b border-border",
                 "text-xs px-0.5", // Use mobile text size directly
-                isHourMark ? "font-bold border-b-2 border-foreground/70" : 
+                isHourMark ? "font-bold border-b-2 border-foreground/70" :
                 isHalfHourMark ? "border-b border-foreground/50" : ""
               )}
+              // Apply scale to height
+              style={{ height: `${rowHeight}px` }}
             >
               {showLabel && slot.time}
             </div>
-          )
+          );
         })}
       </div>
 
       {/* Grid Area */}
+      {/* Grid Area - Reverted to 45vw max */}
       <div
         className="grid grid-flow-col relative"
+        // Apply scale to column width calculation, add max width constraint, and set transform origin
         style={{
-          gridTemplateColumns: `repeat(${stagesToDisplay.length}, minmax(120px, 1fr))`,
+          gridTemplateColumns: `repeat(${stagesToDisplay.length}, minmax(${120 * scale}px, 45vw))`,
+          transformOrigin: 'top left', // Ensure scaling originates from the top-left
         }}
       >
         {/* Current Time Horizontal Line */}
         {nowIndicatorTop !== null && (
           <div
             className="absolute top-0 left-0 w-full h-0.5 bg-red-500 z-20"
+            // Apply scale to top position
             style={{ top: `${nowIndicatorTop}px` }}
           />
         )}
+        {/* Stage Columns */}
         {stagesToDisplay.map((stage) => (
           <div key={stage.id} className="relative border-l border-border min-h-full">
+            {/* Background Grid Lines */}
             {timeSlots.map((slot) => {
-              const date = new Date(slot.timestamp)
-              const isHourMark = date.getMinutes() === 0
-              const isHalfHourMark = date.getMinutes() === 30
+              const date = new Date(slot.timestamp);
+              const isHourMark = date.getMinutes() === 0;
+              const isHalfHourMark = date.getMinutes() === 30;
               return (
                 <div
                   key={`${stage.id}-${slot.timestamp}`}
                   className={cn(
-                    "h-[30px] border-b border-border",
-                    isHourMark ? "border-b-2 border-foreground/70" : 
+                    "border-b border-border",
+                    isHourMark ? "border-b-2 border-foreground/70" :
                     isHalfHourMark ? "border-b border-foreground/50" : ""
                   )}
+                  // Apply scale to height
+                  style={{ height: `${rowHeight}px` }}
                 />
-              )
+              );
             })}
 
+            {/* Performances */}
             {performances
               .filter((p) => p.stageId === stage.id)
               .map((performance) => {
-                const startTime = performance.startTimestamp || 0
-                const endTime = performance.endTimestamp || 0
-                // Use adjustedFirstSlotTime for performance positioning
-                const startPosition = adjustedTotalTimeRange > 0 ? ((startTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight : 0;
-                const endPosition = adjustedTotalTimeRange > 0 ? ((endTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight : 0;
-                const height = endPosition - startPosition
-                const isFavorite = favorites.includes(performance.id)
+                const startTime = performance.startTimestamp || 0;
+                const endTime = performance.endTimestamp || 0;
+                // Calculate position and height based on base total height, then scale
+                const startPosition = adjustedTotalTimeRange > 0 ? (((startTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight) * scale : 0;
+                const endPosition = adjustedTotalTimeRange > 0 ? (((endTime - adjustedFirstSlotTime) / adjustedTotalTimeRange) * totalHeight) * scale : 0;
+                const height = endPosition - startPosition;
+                const isFavorite = favorites.includes(performance.id);
+                const minHeight = 50 * scale; // Scale min height
+
                 return (
                   <button
                     key={performance.id}
@@ -441,35 +509,36 @@ function ImprovedGridView({
                     )}
                     style={{
                       top: `${startPosition}px`,
-                      height: `${Math.max(height, 50)}px`, // Use mobile height directly
-                      minHeight: "50px" // Use mobile min-height directly
+                      height: `${Math.max(height, minHeight)}px`, // Apply scaled height and minHeight
+                      minHeight: `${minHeight}px` // Apply scaled minHeight
                     }}
                     onClick={() => toggleFavorite(performance.id)}
                   >
                     <div className="flex-1 min-w-0 pr-6 text-black">
-                      <div className={cn("font-bold line-clamp-5", "text-xs")}> {/* Use mobile text size */}
+                      {/* Adjust font size based on scale? Optional, can get complex */}
+                      <div className={cn("font-bold line-clamp-5", "text-xs")}>
                         {performance.name}
                       </div>
-                      <div className={cn("text-[10px]")}> {/* Use mobile text size */}
+                      <div className={cn("text-[10px]")}>
                         {performance.startTime} - {performance.endTime}
                       </div>
                     </div>
                     <div className="absolute top-1 right-1">
                       <Heart
                         className={cn(
-                          "h-3 w-3", // Use mobile icon size
+                          "h-3 w-3", // Keep icon size fixed or scale? Fixed for now.
                           isFavorite ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : ""
                         )}
                       />
                     </div>
                   </button>
-                )
+                );
               })}
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function generateTimeSlots(startTime: string, endTime: string, intervalMinutes: number, date: string): TimeSlotInfo[] {

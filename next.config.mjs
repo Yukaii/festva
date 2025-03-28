@@ -1,4 +1,4 @@
-import { withSerwist } from "@serwist/next";
+import withSerwistPlugin from "@serwist/next";
 
 let userConfig = undefined;
 try {
@@ -47,14 +47,10 @@ function mergeConfig(config, userConf) {
 }
 
 // Merge user config before wrapping with Serwist
-mergeConfig(nextConfig, userConfig?.default || userConfig); // Handle both default and direct exports from user config
+mergeConfig(nextConfig, userConfig?.default || userConfig);
 
-export default withSerwist({
-  swSrc: "app/sw.ts",
+export default withSerwistPlugin({
   swDest: "public/sw.js",
-  // Ensure fallbacks are configured if needed, similar to next-pwa
-  // fallbacks: {
-  //   document: "/~offline",
-  // },
-  // Add other Serwist options as needed
+  swSrc: "app/sw.ts",
+  disable: process.env.NODE_ENV === 'development',
 })(nextConfig);

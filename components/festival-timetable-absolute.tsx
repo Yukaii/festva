@@ -514,7 +514,8 @@ function ImprovedGridView({
                     }}
                     onClick={() => toggleFavorite(performance.id)}
                   >
-                    <div className="flex-1 min-w-0 pr-6 text-black">
+                    {/* Removed pr-6, added inline style for dynamic padding based on scale */}
+                    <div className="flex-1 min-w-0 text-black" style={{ paddingRight: `${Math.max(0.25, 1.5 * scale)}rem` }}>
                       {/* Adjust font size based on scale? Optional, can get complex */}
                       <div className={cn("font-bold line-clamp-5", "text-xs")}>
                         {performance.name}

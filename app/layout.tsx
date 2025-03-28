@@ -10,15 +10,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>大港開唱 2025 - Festva</title>
-        <meta name="description" content="Interactive timetable for 大港開唱 2025" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <meta name="theme-color" content="#000000" />
-        <link rel="manifest" href="/manifest.json" />
+        {/* title is handled by metadata */}
+        {/* description is handled by metadata */}
+        {/* viewport is handled by viewport export */}
+        {/* theme-color is handled by viewport export */}
+        {/* manifest is handled by metadata */}
         <link rel="icon" href="/festival-logo.png" />
         <link rel="apple-touch-icon" href="/festival-logo.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        {/* apple-mobile-web-app-capable is handled by metadata */}
+        {/* apple-mobile-web-app-status-bar-style is handled by metadata */}
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>

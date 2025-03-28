@@ -1,34 +1,13 @@
-import withPWA from 'next-pwa'
+import { withSerwist } from "@serwist/next";
 
-let userConfig = undefined
+let userConfig = undefined;
 try {
-  userConfig = await import('./v0-user-next.config')
+  userConfig = await import('./v0-user-next.config');
 } catch (e) {
   // ignore error
 }
 
 /** @type {import('next').NextConfig} */
-const withPWAConfig = withPWA({
-  dest: 'public',
-  register: true,
-  cacheStartUrl: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-  fallbacks: {
-    document: "/~offline",
-    // This is for /_next/.../.json files.
-    data: "/fallback.json",
-    // This is for images.
-    image: "/fallback.webp",
-    // This is for audio files.
-    audio: "/fallback.mp3",
-    // This is for video files.
-    video: "/fallback.mp4",
-    // This is for fonts.
-    font: "/fallback-font.woff2",
-  },  
-})
-
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -44,28 +23,38 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-}
+};
 
-mergeConfig(nextConfig, userConfig)
-
-function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) {
-    return
+function mergeConfig(config, userConf) {
+  if (!userConf) {
+    return;
   }
 
-  for (const key in userConfig) {
+  for (const key in userConf) {
     if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
+      typeof config[key] === 'object' &&
+      !Array.isArray(config[key]) &&
+      config[key] !== null
     ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
-        ...userConfig[key],
-      }
+      config[key] = {
+        ...config[key],
+        ...userConf[key],
+      };
     } else {
-      nextConfig[key] = userConfig[key]
+      config[key] = userConf[key];
     }
   }
 }
 
-export default withPWAConfig(nextConfig)
+// Merge user config before wrapping with Serwist
+mergeConfig(nextConfig, userConfig?.default || userConfig); // Handle both default and direct exports from user config
+
+export default withSerwist({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  // Ensure fallbacks are configured if needed, similar to next-pwa
+  // fallbacks: {
+  //   document: "/~offline",
+  // },
+  // Add other Serwist options as needed
+})(nextConfig);

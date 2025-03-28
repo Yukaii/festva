@@ -11,8 +11,22 @@ try {
 const withPWAConfig = withPWA({
   dest: 'public',
   register: true,
+  cacheStartUrl: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
+  disable: process.env.NODE_ENV === 'development',
+  fallbacks: {
+    document: "/~offline",
+    // This is for /_next/.../.json files.
+    data: "/fallback.json",
+    // This is for images.
+    image: "/fallback.webp",
+    // This is for audio files.
+    audio: "/fallback.mp3",
+    // This is for video files.
+    video: "/fallback.mp4",
+    // This is for fonts.
+    font: "/fallback-font.woff2",
+  },  
 })
 
 const nextConfig = {

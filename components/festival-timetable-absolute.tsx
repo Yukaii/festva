@@ -386,11 +386,11 @@ function ImprovedGridView({
 
   return (
     // Apply mobile styles directly
-    // Added ref and touch-action: none to prevent conflicts with browser pinch zoom
+    // Added ref, removed touch-none, added touch-action: pan-y to allow vertical scroll
     <div ref={gridRef} className={cn(
-      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar touch-none", // Added touch-none
+      "grid grid-rows-[auto_1fr] overflow-auto h-[calc(100vh-200px)] relative border border-border scrollbar", 
       "grid-cols-[50px_1fr]" // Use mobile grid columns directly
-    )}>
+    )} style={{ touchAction: 'pan-x pan-y' }}> {/* Allow horizontal and vertical scrolling */}
       {/* Top-left corner */}
       <div className="bg-background border-r border-b border-border sticky top-0 left-0 z-30" />
 

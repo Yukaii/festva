@@ -1,0 +1,28 @@
+{
+  "name": "Festva - 大港開唱非官方演出資訊排程小工具",
+  "short_name": "Festva",
+  "description": "大港開唱非官方演出資訊排程小工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/festival-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "id": "festa-timetable-v1",
+  "dir": "ltr",
+  "lang": "en",
+  "categories": [
+    "entertainment",
+    "music",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "13"
+}
